@@ -6,6 +6,7 @@ from nacm.constants import FORBIDDEN_PATHS
 from nacm.config import load_profile
 from nacm.indexer.matcher import match_files
 from nacm.session.task import read_current_task
+from nacm.templates.renderer import render_template
 from nacm.utils.paths import agent_dir
 
 
@@ -30,75 +31,28 @@ def build_context_pack(root: Path, target: str = "codex", profile_name: str = "l
 
 
 def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) -> str:
-    lines = [
-        "# NACM Context Pack",
-        "",
-        "## Current Task",
-        "",
-        task,
-        "",
-        "## Task Mode",
-        "",
-        "Small Change Mode unless the work clearly needs a plan first.",
-        "",
-        "## Relevant Files",
-        "",
-    ]
-    for confidence in ("High", "Medium", "Low"):
-        group = [item for item in matched if item["confidence"] == confidence]
-        lines.append(f"### {confidence} Confidence")
-        if group:
-            for item in group:
-                lines.append(f"- `{item['path']}` (score: {item['score']})")
-                lines.extend(render_file_summary(item))
-        else:
-            lines.append("- None")
-        lines.append("")
-    if not matched:
-        lines.extend(
-            [
-                "## No Match Guidance",
-                "",
-                "No relevant files matched this task.",
-                "Use a scoped search before reading additional files.",
-                "Start from likely filenames, module names, or task keywords.",
-                "Do not scan the whole repository unless the user approves.",
-                "",
-            ]
-        )
-    lines.extend(
-        [
-            "## Forbidden Paths",
-            "",
-            *[f"- `{path}`" for path in FORBIDDEN_PATHS],
-            "",
-            "## Suggested Scoped Search",
-            "",
-            "- Start with High Confidence files.",
-            "- If needed, search only related directories from the relevant file list.",
-            "- Avoid full repository scans by default.",
-            "",
-            "## Suggested Commands",
-            "",
-            "```bash",
-            "rg \"<keyword>\" <high-confidence-file-or-directory>",
-            "```",
-            "",
-            "## Device Constraints",
-            "",
-            "- Keep reads small and task-focused.",
-            "- Avoid heavy builds, long tests, and broad scans unless the user approves.",
-            "",
-            "## Completion Criteria",
-            "",
-            "- Implement the requested task.",
-            "- Keep changes scoped to relevant files.",
-            "- Remind the user to run `nacm done`.",
-            "",
-        ]
+    prepared = prepare_matched_files(matched)
+    content = render_template(
+        "context_pack.md.j2",
+        {
+            "task": task,
+            "matched": prepared,
+            "confidence_groups": group_by_confidence(prepared),
+            "forbidden_paths": FORBIDDEN_PATHS,
+        },
     )
-    content = "\n".join(lines)
     return content[:max_chars]
+
+
+def prepare_matched_files(matched: list[dict]) -> list[dict]:
+    return [{**item, "summary_lines": render_file_summary(item)} for item in matched]
+
+
+def group_by_confidence(matched: list[dict]) -> dict[str, list[dict]]:
+    return {
+        confidence: [item for item in matched if item["confidence"] == confidence]
+        for confidence in ("High", "Medium", "Low")
+    }
 
 
 def render_file_summary(item: dict) -> list[str]:
@@ -127,19 +81,4 @@ def _join_limited(values: list[str], limit: int) -> str:
 
 
 def render_codex_prompt() -> str:
-    return "\n".join(
-        [
-            "You are working in a project prepared by NACM.",
-            "",
-            "First read `.agent/sessions/context_pack.md`.",
-            "Prioritize High Confidence files from the context pack.",
-            "Do not scan the whole repository by default.",
-            "Do not read forbidden paths listed in the context pack.",
-            "Do not commit `.agent/`.",
-            "Do not create or modify the repository root AGENTS.md.",
-            "Before editing, provide a short plan.",
-            "If the task requires broad changes, enter Plan Mode first.",
-            "When finished, remind the user to run `nacm done`.",
-            "",
-        ]
-    )
+    return render_template("codex_prompt.md.j2", {})

@@ -1,0 +1,63 @@
+# NACM Context Pack
+
+## Current Task
+
+{{ task }}
+
+## Task Mode
+
+Small Change Mode unless the work clearly needs a plan first.
+
+## Relevant Files
+
+{% for confidence, files in confidence_groups.items() %}
+### {{ confidence }} Confidence
+{% if files %}
+{% for item in files %}
+- `{{ item.path }}` (score: {{ item.score }})
+{% for line in item.summary_lines %}
+{{ line }}
+{% endfor %}
+{% endfor %}
+{% else %}
+- None
+{% endif %}
+
+{% endfor %}
+{% if not matched %}
+## No Match Guidance
+
+No relevant files matched this task.
+Use a scoped search before reading additional files.
+Start from likely filenames, module names, or task keywords.
+Do not scan the whole repository unless the user approves.
+
+{% endif %}
+## Forbidden Paths
+
+{% for path in forbidden_paths %}
+- `{{ path }}`
+{% endfor %}
+
+## Suggested Scoped Search
+
+- Start with High Confidence files.
+- If needed, search only related directories from the relevant file list.
+- Avoid full repository scans by default.
+
+## Suggested Commands
+
+```bash
+rg "<keyword>" <high-confidence-file-or-directory>
+```
+
+## Device Constraints
+
+- Keep reads small and task-focused.
+- Avoid heavy builds, long tests, and broad scans unless the user approves.
+
+## Completion Criteria
+
+- Implement the requested task.
+- Keep changes scoped to relevant files.
+- Remind the user to run `nacm done`.
