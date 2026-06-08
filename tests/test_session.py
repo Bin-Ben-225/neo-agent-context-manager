@@ -26,6 +26,22 @@ def test_quick_generates_context_pack_and_codex_prompt(tmp_path: Path, monkeypat
     assert ".agent/sessions/context_pack.md" in prompt
     assert "Do not scan the whole repository" in prompt
     assert "Do not create or modify the repository root AGENTS.md" in prompt
+    assert "Functions: load_image" in context_pack
+
+
+def test_context_pack_gives_scoped_search_guidance_when_no_files_match(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "images.py").write_text("def load_image(path):\n    return path\n", encoding="utf-8")
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+
+    result = runner.invoke(app, ["quick", "repair billing webhook retry"])
+
+    assert result.exit_code == 0
+    context_pack = (tmp_path / ".agent" / "sessions" / "context_pack.md").read_text(encoding="utf-8")
+    assert "No relevant files matched this task." in context_pack
+    assert "Use a scoped search before reading additional files." in context_pack
 
 
 def test_done_generates_report_with_forbidden_path_warning(tmp_path: Path, monkeypatch):

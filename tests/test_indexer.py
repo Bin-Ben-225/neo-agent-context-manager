@@ -44,3 +44,19 @@ def test_index_build_skips_large_file_content_summary(tmp_path: Path, monkeypatc
     summary = json.loads((tmp_path / ".agent" / "index" / "file_summary.json").read_text(encoding="utf-8"))
     large = next(item for item in summary["files"] if item["path"] == "large.txt")
     assert large["summary_skipped"] is True
+
+
+def test_index_build_extracts_symbols_from_utf8_bom_file(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "images.py").write_bytes(
+        b"\xef\xbb\xbfdef load_image(path):\n    return path\n"
+    )
+    runner.invoke(app, ["init"])
+
+    result = runner.invoke(app, ["index", "build"])
+
+    assert result.exit_code == 0
+    summary = json.loads((tmp_path / ".agent" / "index" / "file_summary.json").read_text(encoding="utf-8"))
+    image_summary = next(item for item in summary["files"] if item["path"] == "src/images.py")
+    assert "load_image" in image_summary["functions"]

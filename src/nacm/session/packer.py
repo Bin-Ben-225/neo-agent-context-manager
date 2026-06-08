@@ -50,9 +50,22 @@ def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) 
         if group:
             for item in group:
                 lines.append(f"- `{item['path']}` (score: {item['score']})")
+                lines.extend(render_file_summary(item))
         else:
             lines.append("- None")
         lines.append("")
+    if not matched:
+        lines.extend(
+            [
+                "## No Match Guidance",
+                "",
+                "No relevant files matched this task.",
+                "Use a scoped search before reading additional files.",
+                "Start from likely filenames, module names, or task keywords.",
+                "Do not scan the whole repository unless the user approves.",
+                "",
+            ]
+        )
     lines.extend(
         [
             "## Forbidden Paths",
@@ -86,6 +99,31 @@ def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) 
     )
     content = "\n".join(lines)
     return content[:max_chars]
+
+
+def render_file_summary(item: dict) -> list[str]:
+    lines = []
+    imports = _join_limited(item.get("imports", []), 6)
+    classes = _join_limited(item.get("classes", []), 6)
+    functions = _join_limited(item.get("functions", []), 8)
+    keywords = _join_limited(item.get("keywords", []), 10)
+    reasons = _join_limited(item.get("reasons", []), 6)
+    if imports:
+        lines.append(f"  - Imports: {imports}")
+    if classes:
+        lines.append(f"  - Classes: {classes}")
+    if functions:
+        lines.append(f"  - Functions: {functions}")
+    if keywords:
+        lines.append(f"  - Keywords: {keywords}")
+    if reasons:
+        lines.append(f"  - Match reasons: {reasons}")
+    return lines
+
+
+def _join_limited(values: list[str], limit: int) -> str:
+    clean = [str(value) for value in values if value]
+    return ", ".join(clean[:limit])
 
 
 def render_codex_prompt() -> str:

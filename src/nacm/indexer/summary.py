@@ -25,7 +25,7 @@ def summarize_file(path: Path, max_head_kb: int) -> dict:
     if size > MAX_LARGE_FILE_BYTES or path.suffix.lower() not in SOURCE_EXTENSIONS:
         return {**base, "summary_skipped": True}
 
-    head = path.read_bytes()[: max_head_kb * 1024].decode("utf-8", errors="ignore")
+    head = path.read_bytes()[: max_head_kb * 1024].decode("utf-8-sig", errors="ignore")
     imports = sorted({match.group(1) or match.group(2) for match in IMPORT_RE.finditer(head)})
     classes = sorted(set(CLASS_RE.findall(head)))
     functions = sorted({left or right for left, right in FUNCTION_RE.findall(head)})
