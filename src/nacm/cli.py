@@ -5,10 +5,11 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from nacm.adapters.codex import copy_codex_prompt
+from nacm.adapters.codex import copy_codex_prompt, write_codex_prompt
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
+from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import save_task
 from nacm.workspace import init_workspace
 
@@ -52,7 +53,8 @@ def pack_command(target: str = typer.Option("codex", "--target")) -> None:
         fail(str(exc))
     console.print(f"Wrote context pack: {result['context_pack']}")
     if target == "codex":
-        console.print(f"Wrote Codex prompt: {result['codex_prompt']}")
+        prompt_path = write_codex_prompt(Path.cwd())
+        console.print(f"Wrote Codex prompt: {prompt_path}")
 
 
 @app.command("copy")
@@ -77,6 +79,7 @@ def quick_command(text: str) -> None:
     require_index(Path.cwd())
     save_task(Path.cwd(), text)
     build_context_pack(Path.cwd(), target="codex")
+    write_codex_prompt(Path.cwd())
     ok, prompt_path, error = copy_codex_prompt(Path.cwd())
     if ok:
         console.print("Generated context pack and copied Codex prompt.")
@@ -90,6 +93,25 @@ def done_command() -> None:
     require_initialized(Path.cwd())
     report = finalize(Path.cwd())
     console.print(f"Wrote report: {report}")
+
+
+@app.command("status")
+def status_command() -> None:
+    console.print(render_status(inspect_workspace(Path.cwd())))
+
+
+@app.command("doctor")
+def doctor_command() -> None:
+    status = inspect_workspace(Path.cwd())
+    if not status.workspace_ready:
+        console.print("NACM workspace not found.")
+        console.print("Run `nacm init --profile low-memory` first.")
+        raise typer.Exit(code=1)
+    if not status.index_ready:
+        console.print("NACM index not found.")
+        console.print("Run `nacm index build` first.")
+        raise typer.Exit(code=1)
+    console.print("NACM doctor passed.")
 
 
 @app.command("finalize")

@@ -23,11 +23,8 @@ def build_context_pack(root: Path, target: str = "codex", profile_name: str = "l
     codex_dir.mkdir(parents=True, exist_ok=True)
 
     context = render_context_pack(task, matched, max_chars=profile.max_context_chars)
-    prompt = render_codex_prompt()
     (sessions / "context_pack.md").write_text(context, encoding="utf-8")
-    if target == "codex":
-        (codex_dir / "codex_prompt.md").write_text(prompt, encoding="utf-8")
-    return {"context_pack": sessions / "context_pack.md", "codex_prompt": codex_dir / "codex_prompt.md"}
+    return {"context_pack": sessions / "context_pack.md"}
 
 
 def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) -> str:
@@ -79,6 +76,3 @@ def _join_limited(values: list[str], limit: int) -> str:
     clean = [str(value) for value in values if value]
     return ", ".join(clean[:limit])
 
-
-def render_codex_prompt() -> str:
-    return render_template("codex_prompt.md.j2", {})
