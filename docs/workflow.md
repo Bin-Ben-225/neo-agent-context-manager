@@ -27,6 +27,20 @@ nacm done
 
 `done` reads lightweight Git status and diff metadata, generates `.agent/reports/latest_report.md`, updates `.agent/sessions/recent_changes.md`, and warns if changes touched forbidden paths or look too large for the low-memory workflow.
 
+The report includes:
+
+- changed file count
+- modified files
+- added or untracked files
+- deleted files
+- renamed files
+- forbidden path checks
+- large-change risk
+- index dirty state
+- next action guidance
+
+If project files changed after the last index build, NACM writes `.agent/cache/index_state.json` and recommends rebuilding the index when useful.
+
 ## Large Tasks
 
-Large tasks should be planned before implementation. The MVP prompt instructs Codex to enter plan mode when a task appears to require broad changes.
+Large tasks should be planned before implementation. The generated prompt instructs Codex to enter plan mode when a task appears to require broad changes.

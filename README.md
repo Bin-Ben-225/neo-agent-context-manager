@@ -2,11 +2,11 @@
 
 A lightweight local context manager for AI coding agents on low-memory devices.
 
-NACM prepares small, task-focused context packs so Codex can work with fewer broad scans and less local I/O. The current MVP is Codex-first and prompt-only.
+NACM prepares small, task-focused context packs so Codex can work with fewer broad scans and less local I/O. The current version is Codex-first and prompt-only.
 
-## Current Scope
+## Current Capabilities
 
-Phase 1 focuses on:
+The current version focuses on:
 
 - Local `.agent/` workspace
 - Low-memory and workstation profiles
@@ -14,9 +14,9 @@ Phase 1 focuses on:
 - Task-level context pack generation
 - Codex prompt generation
 - Clipboard copy for Codex prompts
-- Lightweight task finalization report
+- Task finalization report with changed-file summaries, forbidden path checks, and large-change risk hints
 
-Phase 1 does not implement Claude Code, MCP, plugins, hooks, embeddings, vector databases, GUI/TUI, background services, or automatic Git commits.
+This version does not implement Claude Code, MCP, plugins, hooks, embeddings, vector databases, GUI/TUI, background services, or automatic Git commits.
 
 ## Install For Development
 
@@ -48,12 +48,11 @@ After Codex finishes:
 nacm done
 ```
 
-`done` writes `.agent/reports/latest_report.md` with Git status, diff stat, changed files, and forbidden path warnings.
+`done` writes `.agent/reports/latest_report.md` with Git status, diff stat, changed-file categories, forbidden path warnings, large-change risk hints, and index dirty state.
 
 ## Documentation
 
-- [MVP design](docs/design.md)
+- [Design](docs/design.md)
 - [Workflow](docs/workflow.md)
+- [Examples](docs/examples.md)
 - [Roadmap](docs/roadmap.md)
-
-Private planning documents are kept in `private_docs/` and are not part of the public repository.

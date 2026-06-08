@@ -4,8 +4,8 @@ This repository builds NACM, a local context manager for AI coding agents on low
 
 ## Development Rules
 
-- Keep the MVP Codex-first and prompt-only.
-- Do not implement Claude Code hooks, MCP, plugins, background services, embeddings, vector databases, or GUI/TUI features in Phase 1.
+- Keep the current version Codex-first and prompt-only.
+- Do not implement Claude Code hooks, MCP, plugins, background services, embeddings, vector databases, or GUI/TUI features unless the current task explicitly asks for that scope.
 - Use `pathlib.Path` for path handling.
 - Store cross-device index keys as relative POSIX paths.
 - Do not read credentials or upload user code.

@@ -1,6 +1,6 @@
 # NACM Roadmap
 
-## Phase 1: Codex-first MVP
+## Current Version
 
 - Local `.agent/` workspace
 - Low-memory and workstation profiles
@@ -21,7 +21,7 @@
 - Optional Codex Skill or Plugin integration after separate design review
 - Optional Claude hooks after separate design review
 
-## Out Of Scope For MVP
+## Out Of Scope For The Current Version
 
 - Local LLMs
 - Embeddings
