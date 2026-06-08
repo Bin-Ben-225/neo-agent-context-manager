@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "neo-agent-context-manager"
+version = "0.1.0"
+description = "A lightweight local context manager for AI coding agents on low-memory devices."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "NACM contributors" }]
+dependencies = [
+  "jinja2>=3.1",
+  "pyperclip>=1.8",
+  "rich>=13.0",
+  "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+nacm = "nacm.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nacm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
