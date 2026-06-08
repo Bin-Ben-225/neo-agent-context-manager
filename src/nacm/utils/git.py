@@ -33,4 +33,4 @@ def run_git(root: Path, args: list[str]) -> str:
         encoding="utf-8",
         errors="replace",
     )
-    return result.stdout.strip()
+    return result.stdout.rstrip()
