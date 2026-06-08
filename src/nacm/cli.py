@@ -28,6 +28,7 @@ def init_command(profile: str = typer.Option("low-memory", "--profile")) -> None
 
 @index_app.command("build")
 def index_build(profile: str = typer.Option("low-memory", "--profile")) -> None:
+    require_initialized(Path.cwd())
     result = build_index(Path.cwd(), profile=profile)
     console.print(
         f"Indexed {result['meta']['scanned_files']} files; skipped {result['meta']['skipped_files']} files."
@@ -36,13 +37,19 @@ def index_build(profile: str = typer.Option("low-memory", "--profile")) -> None:
 
 @app.command("task")
 def task_command(text: str) -> None:
+    require_initialized(Path.cwd())
     task = save_task(Path.cwd(), text)
     console.print(f"Saved task {task['id']}")
 
 
 @app.command("pack")
 def pack_command(target: str = typer.Option("codex", "--target")) -> None:
-    result = build_context_pack(Path.cwd(), target=target)
+    require_initialized(Path.cwd())
+    require_index(Path.cwd())
+    try:
+        result = build_context_pack(Path.cwd(), target=target)
+    except ValueError as exc:
+        fail(str(exc))
     console.print(f"Wrote context pack: {result['context_pack']}")
     if target == "codex":
         console.print(f"Wrote Codex prompt: {result['codex_prompt']}")
@@ -50,9 +57,13 @@ def pack_command(target: str = typer.Option("codex", "--target")) -> None:
 
 @app.command("copy")
 def copy_command(target: str) -> None:
+    require_initialized(Path.cwd())
     if target != "codex":
         raise typer.BadParameter("Only `codex` is supported in Phase 1.")
-    ok, prompt_path, error = copy_codex_prompt(Path.cwd())
+    try:
+        ok, prompt_path, error = copy_codex_prompt(Path.cwd())
+    except FileNotFoundError as exc:
+        fail(str(exc))
     if ok:
         console.print("Copied Codex prompt to clipboard.")
     else:
@@ -62,6 +73,8 @@ def copy_command(target: str) -> None:
 
 @app.command("quick")
 def quick_command(text: str) -> None:
+    require_initialized(Path.cwd())
+    require_index(Path.cwd())
     save_task(Path.cwd(), text)
     build_context_pack(Path.cwd(), target="codex")
     ok, prompt_path, error = copy_codex_prompt(Path.cwd())
@@ -74,6 +87,7 @@ def quick_command(text: str) -> None:
 
 @app.command("done")
 def done_command() -> None:
+    require_initialized(Path.cwd())
     report = finalize(Path.cwd())
     console.print(f"Wrote report: {report}")
 
@@ -85,3 +99,18 @@ def finalize_command() -> None:
 
 def main() -> None:
     app()
+
+
+def require_initialized(root: Path) -> None:
+    if not (root / ".agent").is_dir():
+        fail("NACM workspace not found. Run `nacm init` first.")
+
+
+def require_index(root: Path) -> None:
+    if not (root / ".agent" / "index" / "file_summary.json").is_file():
+        fail("NACM index not found. Run `nacm index build` first.")
+
+
+def fail(message: str) -> None:
+    console.print(message)
+    raise typer.Exit(code=1)

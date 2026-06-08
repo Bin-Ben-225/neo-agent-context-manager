@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from nacm.constants import DEFAULT_PROFILE, IGNORED_DIRS, IGNORED_PREFIXES
+from nacm.config import load_profile
 from nacm.indexer.summary import summarize_file
 from nacm.utils.paths import agent_dir, has_ignored_part, to_posix_relative
 
@@ -13,7 +14,7 @@ def build_index(root: Path, profile: str = DEFAULT_PROFILE) -> dict:
     local_agent = agent_dir(root)
     index_dir = local_agent / "index"
     index_dir.mkdir(parents=True, exist_ok=True)
-    max_head_kb = _read_profile_int(local_agent / "profiles" / f"{profile}.toml", "max_file_head_kb", 16)
+    loaded_profile = load_profile(root, profile)
 
     files: list[dict] = []
     skipped = 0
@@ -24,7 +25,7 @@ def build_index(root: Path, profile: str = DEFAULT_PROFILE) -> dict:
         if has_ignored_part(relative, IGNORED_DIRS, IGNORED_PREFIXES):
             skipped += 1
             continue
-        summary = summarize_file(path, max_head_kb=max_head_kb)
+        summary = summarize_file(path, max_head_kb=loaded_profile.max_file_head_kb)
         files.append(
             {
                 "path": relative,
@@ -37,7 +38,7 @@ def build_index(root: Path, profile: str = DEFAULT_PROFILE) -> dict:
     payload = {"files": files}
     meta = {
         "indexed_at": datetime.now(timezone.utc).isoformat(),
-        "profile": profile,
+        "profile": loaded_profile.name,
         "scanned_files": len(files),
         "skipped_files": skipped,
     }
@@ -61,12 +62,3 @@ def render_module_index(files: list[dict]) -> str:
         symbols = ", ".join(item["classes"] + item["functions"]) or "no symbols"
         lines.append(f"- `{item['path']}`: {symbols}")
     return "\n".join(lines) + "\n"
-
-
-def _read_profile_int(path: Path, key: str, default: int) -> int:
-    if not path.exists():
-        return default
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip().startswith(f"{key} "):
-            return int(line.split("=", 1)[1].strip())
-    return default

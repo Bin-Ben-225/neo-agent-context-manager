@@ -3,15 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 
 from nacm.constants import FORBIDDEN_PATHS
+from nacm.config import load_profile
 from nacm.indexer.matcher import match_files
 from nacm.session.task import read_current_task
 from nacm.utils.paths import agent_dir
 
 
-def build_context_pack(root: Path, target: str = "codex") -> dict:
+def build_context_pack(root: Path, target: str = "codex", profile_name: str = "low-memory") -> dict:
     task = read_current_task(root)
     if not task:
         raise ValueError("No current task. Run `nacm task \"...\"` first.")
+    profile = load_profile(root, profile_name)
     matched = match_files(root, task)
     local_agent = agent_dir(root)
     sessions = local_agent / "sessions"
@@ -19,7 +21,7 @@ def build_context_pack(root: Path, target: str = "codex") -> dict:
     sessions.mkdir(parents=True, exist_ok=True)
     codex_dir.mkdir(parents=True, exist_ok=True)
 
-    context = render_context_pack(task, matched)
+    context = render_context_pack(task, matched, max_chars=profile.max_context_chars)
     prompt = render_codex_prompt()
     (sessions / "context_pack.md").write_text(context, encoding="utf-8")
     if target == "codex":
@@ -27,7 +29,7 @@ def build_context_pack(root: Path, target: str = "codex") -> dict:
     return {"context_pack": sessions / "context_pack.md", "codex_prompt": codex_dir / "codex_prompt.md"}
 
 
-def render_context_pack(task: str, matched: list[dict]) -> str:
+def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) -> str:
     lines = [
         "# NACM Context Pack",
         "",
@@ -83,7 +85,7 @@ def render_context_pack(task: str, matched: list[dict]) -> str:
         ]
     )
     content = "\n".join(lines)
-    return content[:30_000]
+    return content[:max_chars]
 
 
 def render_codex_prompt() -> str:
