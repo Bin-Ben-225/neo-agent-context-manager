@@ -5,9 +5,12 @@
 ```bash
 nacm init --profile low-memory
 nacm index build
+nacm doctor
 ```
 
 `init` creates the local `.agent/` workspace. `index build` creates a lightweight project map and file summary.
+
+`doctor` checks whether the local workspace and lightweight index are ready.
 
 ## Daily Small Task
 
@@ -18,6 +21,12 @@ nacm quick "fix image loading path issue"
 This command stores the task, generates `.agent/sessions/context_pack.md`, renders `.agent/codex/codex_prompt.md`, and tries to copy the prompt to the clipboard.
 
 Paste the prompt into Codex and let Codex work inside the same project.
+
+To inspect local NACM state at any time:
+
+```bash
+nacm status
+```
 
 ## Finish A Task
 

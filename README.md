@@ -30,6 +30,19 @@ On Windows, if `python` points to an environment without `pip`, use the Python l
 py -3.11 -m pip install -e .[dev]
 ```
 
+After installation, either command form works:
+
+```bash
+nacm --help
+python -m nacm --help
+```
+
+On Windows, `nacm.exe` may be installed into a Python `Scripts` directory that is not on `PATH`. In that case, use:
+
+```powershell
+py -3.11 -m nacm --help
+```
+
 ## Basic Workflow
 
 Run these commands inside the project you want Codex to work on:
@@ -55,4 +68,6 @@ nacm done
 - [Design](docs/design.md)
 - [Workflow](docs/workflow.md)
 - [Examples](docs/examples.md)
+- [Installation](docs/install.md)
+- [Validation](docs/validation.md)
 - [Roadmap](docs/roadmap.md)
