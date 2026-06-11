@@ -36,6 +36,20 @@ nacm match explain "fix image loading path issue"
 
 The explain output lists ranked files, confidence, score, and the signals that contributed to the match.
 
+To review recent tasks:
+
+```bash
+nacm task list
+nacm task show latest
+```
+
+To keep a context pack small or include detailed match explanations:
+
+```bash
+nacm pack --max-files 5 --explain
+nacm quick "fix image loading path issue" --max-files 5 --explain
+```
+
 ## Finish A Task
 
 ```bash
@@ -60,4 +74,10 @@ If project files changed after the last index build, NACM writes `.agent/cache/i
 
 ## Large Tasks
 
-Large tasks should be planned before implementation. The generated prompt instructs Codex to enter plan mode when a task appears to require broad changes.
+Large tasks should be planned before implementation:
+
+```bash
+nacm plan "refactor matcher and add tests"
+```
+
+The plan is written under `.agent/sessions/batches/`. NACM does not execute the plan automatically.

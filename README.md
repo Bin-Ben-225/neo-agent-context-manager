@@ -12,6 +12,8 @@ The current version focuses on:
 - Low-memory and workstation profiles
 - Lightweight path and Python-aware file-header index
 - Task-level context pack generation
+- Task history and prompt-only batch planning
+- Context pack file-budget controls
 - Match explanations for relevant file selection
 - Codex prompt generation
 - Clipboard copy for Codex prompts
@@ -75,6 +77,12 @@ Inspect why NACM selected files for a task:
 
 ```bash
 nacm match explain "fix image loading path issue"
+```
+
+For a larger request, create a local prompt-only batch plan:
+
+```bash
+nacm plan "refactor matcher and add tests"
 ```
 
 ## Documentation

@@ -2,12 +2,17 @@
 
 All notable changes to NACM will be documented in this file.
 
-## Unreleased
+## 0.1.0a2
+
+Second alpha release candidate.
 
 ### Added
 
 - `nacm validate smoke` for running the core workflow smoke test from the CLI.
 - `nacm match explain` for inspecting ranked file matches and score signals.
+- `nacm task set`, `nacm task list`, and `nacm task show latest` for local task history.
+- `nacm plan` for prompt-only batch planning.
+- `nacm pack --max-files --explain` and `nacm quick --max-files --explain` for context pack budget control.
 - Local matcher quality fixtures covering source, tests, benchmark, localization, and typing-marker files.
 
 ### Changed
