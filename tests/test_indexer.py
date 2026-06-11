@@ -111,3 +111,48 @@ def test_index_build_extracts_python_imports_methods_tests_and_exports(tmp_path:
     assert "ReportService" in service["exports"]
     assert "service" in service["doc_keywords"]
     assert "test_render_report" in tests["test_functions"]
+
+
+def test_workstation_index_writes_relation_index(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src" / "sample_pkg").mkdir(parents=True)
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "src" / "sample_pkg" / "__init__.py").write_text("", encoding="utf-8")
+    (tmp_path / "src" / "sample_pkg" / "alpha.py").write_text(
+        "import json\n\n"
+        "def calculate_alpha():\n"
+        "    return json.dumps({})\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tests" / "test_alpha.py").write_text(
+        "from sample_pkg.alpha import calculate_alpha\n\n"
+        "def test_calculate_alpha():\n"
+        "    assert calculate_alpha()\n",
+        encoding="utf-8",
+    )
+    runner.invoke(app, ["init"])
+
+    result = runner.invoke(app, ["index", "build", "--profile", "workstation"])
+
+    assert result.exit_code == 0
+    relation_path = tmp_path / ".agent" / "index" / "relation_index.json"
+    relation_doc = tmp_path / ".agent" / "index" / "relation_index.md"
+    assert relation_path.exists()
+    assert relation_doc.exists()
+    relations = json.loads(relation_path.read_text(encoding="utf-8"))
+    assert relations["modules"]["sample_pkg.alpha"] == "src/sample_pkg/alpha.py"
+    assert relations["source_tests"]["src/sample_pkg/alpha.py"] == ["tests/test_alpha.py"]
+    assert relations["test_sources"]["tests/test_alpha.py"] == ["src/sample_pkg/alpha.py"]
+    assert relations["importers"]["sample_pkg.alpha"] == ["tests/test_alpha.py"]
+
+
+def test_low_memory_index_does_not_write_relation_index(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+    runner.invoke(app, ["init"])
+
+    result = runner.invoke(app, ["index", "build"])
+
+    assert result.exit_code == 0
+    assert not (tmp_path / ".agent" / "index" / "relation_index.json").exists()

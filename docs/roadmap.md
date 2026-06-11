@@ -9,6 +9,7 @@
 - Task history and prompt-only batch planning
 - Match explanations and local matcher quality fixtures
 - Python-aware symbol extraction
+- Workstation relation index for Python modules, imports, and source-test links
 - Context pack generation
 - Context pack budget controls
 - Codex prompt generation and clipboard copy
@@ -18,7 +19,6 @@
 
 ## Planned Improvements
 
-- Workstation-generated enhanced indexes
 - Optional Claude Code prompt-only support
 - Optional Codex Skill or Plugin integration after separate design review
 - Optional Claude hooks after separate design review

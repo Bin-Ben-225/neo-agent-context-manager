@@ -7,6 +7,7 @@ from pathlib import Path
 from nacm.constants import DEFAULT_PROFILE, IGNORED_DIRS, IGNORED_PREFIXES
 from nacm.config import load_profile
 from nacm.indexer.summary import summarize_file
+from nacm.indexer.relations import build_relation_index, render_relation_index
 from nacm.utils.paths import agent_dir, has_ignored_part, to_posix_relative
 
 
@@ -46,6 +47,13 @@ def build_index(root: Path, profile: str = DEFAULT_PROFILE) -> dict:
     (index_dir / "index_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     (index_dir / "project_map.md").write_text(render_project_map(files), encoding="utf-8")
     (index_dir / "module_index.md").write_text(render_module_index(files), encoding="utf-8")
+    if loaded_profile.name == "workstation":
+        relations = build_relation_index(files)
+        (index_dir / "relation_index.json").write_text(
+            json.dumps(relations, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        (index_dir / "relation_index.md").write_text(render_relation_index(relations), encoding="utf-8")
     return {"files": files, "meta": meta}
 
 
