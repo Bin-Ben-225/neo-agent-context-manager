@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 import typer
 from rich.console import Console
@@ -11,7 +12,7 @@ from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
 from nacm.session.status import inspect_workspace, render_status
-from nacm.session.task import save_task
+from nacm.session.task import latest_task, list_tasks, save_task
 from nacm.validation import run_smoke_validation
 from nacm.workspace import init_workspace
 
@@ -19,9 +20,11 @@ app = typer.Typer(no_args_is_help=True)
 index_app = typer.Typer(no_args_is_help=True)
 validate_app = typer.Typer(no_args_is_help=True)
 match_app = typer.Typer(no_args_is_help=True)
+task_app = typer.Typer(no_args_is_help=True)
 app.add_typer(index_app, name="index")
 app.add_typer(validate_app, name="validate")
 app.add_typer(match_app, name="match")
+app.add_typer(task_app, name="task")
 console = Console()
 
 
@@ -42,11 +45,35 @@ def index_build(profile: str = typer.Option("low-memory", "--profile")) -> None:
     )
 
 
-@app.command("task")
+@task_app.command("set")
 def task_command(text: str) -> None:
     require_initialized(Path.cwd())
     task = save_task(Path.cwd(), text)
     console.print(f"Saved task {task['id']}")
+
+
+@task_app.command("list")
+def task_list_command(limit: int = typer.Option(20, "--limit")) -> None:
+    require_initialized(Path.cwd())
+    tasks = list_tasks(Path.cwd(), limit=limit)
+    if not tasks:
+        console.print("No task history found.")
+        return
+    for task in tasks:
+        console.print(f"{task['id']}  {task['text']}")
+
+
+@task_app.command("show")
+def task_show_command(task_id: str = typer.Argument("latest")) -> None:
+    require_initialized(Path.cwd())
+    if task_id != "latest":
+        fail("Only `latest` is supported for task show in the current version.")
+    task = latest_task(Path.cwd())
+    if not task:
+        fail("No task history found.")
+    console.print(f"Task ID: {task['id']}")
+    console.print(f"Task: {task['text']}")
+    console.print(f"Keywords: {', '.join(task['keywords'])}")
 
 
 @app.command("pack")
@@ -152,7 +179,13 @@ def finalize_command() -> None:
 
 
 def main() -> None:
+    normalize_legacy_task_args()
     app()
+
+
+def normalize_legacy_task_args() -> None:
+    if len(sys.argv) >= 3 and sys.argv[1] == "task" and sys.argv[2] not in {"set", "list", "show"}:
+        sys.argv.insert(2, "set")
 
 
 def require_initialized(root: Path) -> None:

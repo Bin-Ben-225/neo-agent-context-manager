@@ -30,6 +30,25 @@ def test_quick_generates_context_pack_and_codex_prompt(tmp_path: Path, monkeypat
     assert "Functions: load_image" in context_pack
 
 
+def test_task_history_lists_and_shows_latest_task(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(app, ["init"])
+
+    first = runner.invoke(app, ["task", "set", "fix image loading"])
+    second = runner.invoke(app, ["task", "set", "update report output"])
+    listed = runner.invoke(app, ["task", "list"])
+    shown = runner.invoke(app, ["task", "show", "latest"])
+
+    assert first.exit_code == 0
+    assert second.exit_code == 0
+    assert listed.exit_code == 0
+    assert "fix image loading" in listed.stdout
+    assert "update report output" in listed.stdout
+    assert shown.exit_code == 0
+    assert "update report output" in shown.stdout
+    assert "fix image loading" not in shown.stdout
+
+
 def test_context_pack_gives_scoped_search_guidance_when_no_files_match(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     (tmp_path / "src").mkdir()
@@ -51,7 +70,7 @@ def test_build_context_pack_does_not_write_codex_prompt(tmp_path: Path, monkeypa
     (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
     runner.invoke(app, ["init"])
     runner.invoke(app, ["index", "build"])
-    runner.invoke(app, ["task", "fix src/app.py"])
+    runner.invoke(app, ["task", "set", "fix src/app.py"])
 
     result = build_context_pack(tmp_path)
 

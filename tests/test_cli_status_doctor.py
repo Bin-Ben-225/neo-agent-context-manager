@@ -24,7 +24,7 @@ def test_status_reports_workspace_index_task_and_dirty_state(tmp_path: Path, mon
     (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
     runner.invoke(app, ["init"])
     runner.invoke(app, ["index", "build"])
-    runner.invoke(app, ["task", "fix src/app.py"])
+    runner.invoke(app, ["task", "set", "fix src/app.py"])
     (tmp_path / ".agent" / "cache" / "index_state.json").write_text(
         '{"dirty": true, "reason": "changed", "changed_files": ["src/app.py"]}',
         encoding="utf-8",
