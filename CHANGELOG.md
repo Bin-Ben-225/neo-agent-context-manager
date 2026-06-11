@@ -11,6 +11,7 @@ All notable changes to NACM will be documented in this file.
 - Prompt target adapter registry with `codex` and `claude-prompt` targets.
 - Prompt-only Claude-style template generation via `--target claude-prompt`.
 - Target prompts now include task, confidence counts, and relation-index availability metadata when present.
+- Public real-project validation notes and an optional PowerShell validation script.
 
 ## 0.1.0a2
 

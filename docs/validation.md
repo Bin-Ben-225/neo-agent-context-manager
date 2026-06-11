@@ -98,6 +98,8 @@ The current workflow has also been checked against
 [`python-humanize/humanize`](https://github.com/python-humanize/humanize), a small Python library with source files,
 tests, documentation, localization files, and benchmark files.
 
+For a broader validation matrix, see [Real Project Validation](real-project-validation.md).
+
 Use a fresh clone of the project and run:
 
 ```powershell
