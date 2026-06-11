@@ -10,24 +10,42 @@ from nacm.templates.renderer import render_template
 from nacm.utils.paths import agent_dir
 
 
-def build_context_pack(root: Path, target: str = "codex", profile_name: str = "low-memory") -> dict:
+def build_context_pack(
+    root: Path,
+    target: str = "codex",
+    profile_name: str = "low-memory",
+    max_files: int | None = None,
+    include_explanations: bool = False,
+) -> dict:
     task = read_current_task(root)
     if not task:
         raise ValueError("No current task. Run `nacm task \"...\"` first.")
     profile = load_profile(root, profile_name)
-    matched = match_files(root, task)
+    matched = match_files(root, task, limit=max_files or profile.max_files_in_context)
     local_agent = agent_dir(root)
     sessions = local_agent / "sessions"
     codex_dir = local_agent / "codex"
     sessions.mkdir(parents=True, exist_ok=True)
     codex_dir.mkdir(parents=True, exist_ok=True)
 
-    context = render_context_pack(task, matched, max_chars=profile.max_context_chars)
+    context = render_context_pack(
+        task,
+        matched,
+        max_chars=profile.max_context_chars,
+        max_files=max_files or profile.max_files_in_context,
+        include_explanations=include_explanations,
+    )
     (sessions / "context_pack.md").write_text(context, encoding="utf-8")
     return {"context_pack": sessions / "context_pack.md"}
 
 
-def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) -> str:
+def render_context_pack(
+    task: str,
+    matched: list[dict],
+    max_chars: int = 30000,
+    max_files: int = 8,
+    include_explanations: bool = False,
+) -> str:
     prepared = prepare_matched_files(matched)
     content = render_template(
         "context_pack.md.j2",
@@ -36,6 +54,8 @@ def render_context_pack(task: str, matched: list[dict], max_chars: int = 30000) 
             "matched": prepared,
             "confidence_groups": group_by_confidence(prepared),
             "forbidden_paths": FORBIDDEN_PATHS,
+            "max_files": max_files,
+            "include_explanations": include_explanations,
         },
     )
     return content[:max_chars]

@@ -78,11 +78,20 @@ def task_show_command(task_id: str = typer.Argument("latest")) -> None:
 
 
 @app.command("pack")
-def pack_command(target: str = typer.Option("codex", "--target")) -> None:
+def pack_command(
+    target: str = typer.Option("codex", "--target"),
+    max_files: int | None = typer.Option(None, "--max-files"),
+    explain: bool = typer.Option(False, "--explain"),
+) -> None:
     require_initialized(Path.cwd())
     require_index(Path.cwd())
     try:
-        result = build_context_pack(Path.cwd(), target=target)
+        result = build_context_pack(
+            Path.cwd(),
+            target=target,
+            max_files=max_files,
+            include_explanations=explain,
+        )
     except ValueError as exc:
         fail(str(exc))
     console.print(f"Wrote context pack: {result['context_pack']}")
@@ -108,11 +117,15 @@ def copy_command(target: str) -> None:
 
 
 @app.command("quick")
-def quick_command(text: str) -> None:
+def quick_command(
+    text: str,
+    max_files: int | None = typer.Option(None, "--max-files"),
+    explain: bool = typer.Option(False, "--explain"),
+) -> None:
     require_initialized(Path.cwd())
     require_index(Path.cwd())
     save_task(Path.cwd(), text)
-    build_context_pack(Path.cwd(), target="codex")
+    build_context_pack(Path.cwd(), target="codex", max_files=max_files, include_explanations=explain)
     write_codex_prompt(Path.cwd())
     ok, prompt_path, error = copy_codex_prompt(Path.cwd())
     if ok:

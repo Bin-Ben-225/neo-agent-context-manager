@@ -10,6 +10,8 @@ Small Change Mode unless the work clearly needs a plan first.
 
 ## Relevant Files
 
+Included file budget: {{ max_files | default(8) }}
+
 {% for confidence, files in confidence_groups.items() %}
 ### {{ confidence }} Confidence
 {% if files %}
@@ -24,6 +26,17 @@ Small Change Mode unless the work clearly needs a plan first.
 {% endif %}
 
 {% endfor %}
+{% if include_explanations | default(false) and matched %}
+## Match Explanations
+
+{% for item in matched %}
+### `{{ item.path }}`
+{% for explanation in item.explanations %}
+- {{ explanation.signal }}: {{ explanation.detail }} ({{ "%+d"|format(explanation.weight) }})
+{% endfor %}
+
+{% endfor %}
+{% endif %}
 {% if not matched %}
 ## No Match Guidance
 

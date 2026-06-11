@@ -78,6 +78,25 @@ def test_build_context_pack_does_not_write_codex_prompt(tmp_path: Path, monkeypa
     assert not (tmp_path / ".agent" / "codex" / "codex_prompt.md").exists()
 
 
+def test_pack_respects_max_files_and_can_include_explanations(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "one.py").write_text("def target_one():\n    return True\n", encoding="utf-8")
+    (tmp_path / "src" / "two.py").write_text("def target_two():\n    return True\n", encoding="utf-8")
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+    runner.invoke(app, ["task", "set", "target one two"])
+
+    result = runner.invoke(app, ["pack", "--max-files", "1", "--explain"])
+
+    assert result.exit_code == 0
+    context_pack = (tmp_path / ".agent" / "sessions" / "context_pack.md").read_text(encoding="utf-8")
+    relevant_lines = [line for line in context_pack.splitlines() if line.startswith("- `src/")]
+    assert len(relevant_lines) == 1
+    assert "## Match Explanations" in context_pack
+    assert "Included file budget: 1" in context_pack
+
+
 def test_done_generates_report_with_forbidden_path_warning(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
