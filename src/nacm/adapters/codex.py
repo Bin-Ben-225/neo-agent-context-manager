@@ -5,16 +5,18 @@ from pathlib import Path
 from nacm.templates.renderer import render_template
 from nacm.utils.clipboard import copy_text
 from nacm.utils.paths import agent_dir
+from nacm.adapters.metadata import prompt_metadata
 
 
-def render_codex_prompt() -> str:
-    return render_template("codex_prompt.md.j2", {})
+def render_codex_prompt(root: Path | None = None) -> str:
+    context = prompt_metadata(root, "codex") if root else {}
+    return render_template("codex_prompt.md.j2", context)
 
 
 def write_codex_prompt(root: Path) -> Path:
     prompt_path = agent_dir(root) / "codex" / "codex_prompt.md"
     prompt_path.parent.mkdir(parents=True, exist_ok=True)
-    prompt_path.write_text(render_codex_prompt(), encoding="utf-8")
+    prompt_path.write_text(render_codex_prompt(root), encoding="utf-8")
     return prompt_path
 
 

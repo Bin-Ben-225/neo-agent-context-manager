@@ -36,3 +36,30 @@ def test_registry_copy_reports_target_without_clipboard_support(tmp_path: Path):
     assert ok is False
     assert prompt_path == tmp_path / ".agent" / "claude" / "claude_prompt.md"
     assert "does not support clipboard copy" in str(error)
+
+
+def test_registry_prompts_include_task_and_relation_metadata(tmp_path: Path):
+    sessions = tmp_path / ".agent" / "sessions"
+    index = tmp_path / ".agent" / "index"
+    sessions.mkdir(parents=True)
+    index.mkdir(parents=True)
+    (sessions / "current_task.md").write_text(
+        "# Current Task\n\nTask ID: 1\nTask: fix relation aware matching\n",
+        encoding="utf-8",
+    )
+    (sessions / "context_pack.md").write_text(
+        "### High Confidence\n- `src/matcher.py` (score: 10)\n"
+        "### Medium Confidence\n- None\n"
+        "### Low Confidence\n- None\n",
+        encoding="utf-8",
+    )
+    (index / "relation_index.json").write_text("{}", encoding="utf-8")
+
+    codex_prompt = write_prompt(tmp_path, "codex").read_text(encoding="utf-8")
+    claude_prompt = write_prompt(tmp_path, "claude-prompt").read_text(encoding="utf-8")
+
+    assert "Current task: fix relation aware matching" in codex_prompt
+    assert "Relation index: available" in codex_prompt
+    assert "High confidence files: 1" in codex_prompt
+    assert "Current task: fix relation aware matching" in claude_prompt
+    assert "Use relation index hints as navigation aids." in claude_prompt

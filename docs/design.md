@@ -80,6 +80,8 @@ Supported prompt targets are:
 - `codex`: writes `.agent/codex/codex_prompt.md` and supports clipboard copy.
 - `claude-prompt`: writes `.agent/claude/claude_prompt.md` for prompt-only Claude-style use. It does not install hooks, use MCP, run plugins, or start background services.
 
+Prompt templates receive lightweight metadata when available: the current task, confidence file counts, and whether a workstation relation index exists.
+
 ## Safety
 
 NACM is local-only. It does not read credentials, upload code, proxy Codex login, run heavy build commands, commit changes, push changes, or start another agent.

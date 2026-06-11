@@ -1,8 +1,20 @@
 You are working in a project prepared by NACM.
 
 Read `.agent/sessions/context_pack.md` before editing.
+{% if task | default("") %}
+Current task: {{ task }}
+{% endif %}
+{% if relation_index_available is defined %}
+Relation index: {{ "available" if relation_index_available else "not available" }}
+High confidence files: {{ high_confidence_count | default(0) }}
+Medium confidence files: {{ medium_confidence_count | default(0) }}
+Low confidence files: {{ low_confidence_count | default(0) }}
+{% endif %}
 Prioritize High Confidence files from the context pack.
 Use the match explanations only as hints; verify before changing code.
+{% if relation_index_available | default(false) %}
+Use relation index hints as navigation aids.
+{% endif %}
 Do not scan the whole repository by default.
 Do not read forbidden paths listed in the context pack.
 Do not commit `.agent/`.
