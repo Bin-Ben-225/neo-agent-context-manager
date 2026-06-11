@@ -8,11 +8,13 @@
 - Task capture and relevant file matching
 - Task history and prompt-only batch planning
 - Match explanations and local matcher quality fixtures
+- Relation-aware matching when a workstation relation index exists
 - Python-aware symbol extraction
 - Workstation relation index for Python modules, imports, and source-test links
 - Context pack generation
 - Context pack budget controls
 - Prompt adapter targets for Codex and prompt-only Claude-style workflows
+- Target-specific prompt metadata and guidance
 - Codex prompt generation and clipboard copy
 - Quick workflow
 - Done/finalize report
@@ -20,7 +22,6 @@
 
 ## Planned Improvements
 
-- Target-specific prompt quality improvements
 - Optional Codex Skill or Plugin integration after separate design review
 - Optional Claude hooks after separate design review
 

@@ -2,7 +2,9 @@
 
 All notable changes to NACM will be documented in this file.
 
-## Unreleased
+## 0.1.0a3
+
+Third alpha release candidate.
 
 ### Added
 
