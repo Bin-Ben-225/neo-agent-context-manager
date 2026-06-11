@@ -36,7 +36,7 @@ NACM uses only lightweight signals:
 - L0 path metadata: relative POSIX path, size, mtime, extension, and directory depth.
 - L1 file header summary: imports, class/function names, methods, test functions, exports, doc keywords, and general keywords from the first file header chunk.
 - Workstation relation index: optional Python module, import, and source-test links generated for the `workstation` profile.
-- Task matching: explicit path mentions, filename stems, path keywords, Python symbols, summary keyword scoring, and low-value file demotion.
+- Task matching: explicit path mentions, filename stems, path keywords, Python symbols, summary keyword scoring, relation-aware boosts, and low-value file demotion.
 - Match explanations: ranked files include the signals and weights that contributed to selection.
 
 The index never performs full semantic indexing, embedding, vector search, full-file hashing, or realtime watching.

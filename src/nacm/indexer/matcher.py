@@ -39,6 +39,7 @@ def match_files(root: Path, task_text: str, limit: int = 8) -> list[dict]:
     if not summary_path.exists():
         return []
     files = json.loads(summary_path.read_text(encoding="utf-8")).get("files", [])
+    relations = load_relation_index(root)
     explicit_paths = extract_path_mentions(task_text)
     keywords = extract_query_keywords(task_text, explicit_paths)
     semantic_keywords = extract_semantic_keywords(task_text, explicit_paths)
@@ -80,8 +81,64 @@ def match_files(root: Path, task_text: str, limit: int = 8) -> list[dict]:
                     "explanations": explanations,
                 }
             )
+    apply_relation_boosts(scored, relations)
     scored.sort(key=lambda item: (-item["score"], item["path"]))
     return scored[:limit]
+
+
+def load_relation_index(root: Path) -> dict:
+    relation_path = agent_dir(root) / "index" / "relation_index.json"
+    if not relation_path.exists():
+        return {}
+    return json.loads(relation_path.read_text(encoding="utf-8"))
+
+
+def apply_relation_boosts(scored: list[dict], relations: dict) -> None:
+    if not relations:
+        return
+    by_path = {item["path"]: item for item in scored}
+    initially_matched = set(by_path)
+    for source, tests in relations.get("source_tests", {}).items():
+        if source in initially_matched:
+            for test_path in tests:
+                if test_path in by_path:
+                    add_scored_explanation(
+                        by_path[test_path],
+                        "relation",
+                        f"related test for {source}",
+                        4,
+                    )
+        for test_path in tests:
+            if test_path in initially_matched and source in by_path:
+                add_scored_explanation(
+                    by_path[source],
+                    "relation",
+                    f"related source for {test_path}",
+                    4,
+                )
+    for module, importers in relations.get("importers", {}).items():
+        source = relations.get("modules", {}).get(module)
+        if source and source in initially_matched:
+            for importer in importers:
+                if importer in by_path and importer != source and not has_quality_penalty(by_path[importer]):
+                    add_scored_explanation(by_path[importer], "relation", f"importer of {module}", 2)
+
+
+def add_scored_explanation(item: dict, signal: str, detail: str, weight: int) -> None:
+    explanation = {"signal": signal, "detail": detail, "weight": weight}
+    if explanation in item.get("explanations", []):
+        return
+    item.setdefault("explanations", []).append(explanation)
+    item["score"] += weight
+    item["confidence"] = _confidence(item["score"])
+    item["reasons"] = explanation_reasons(item["explanations"])
+
+
+def has_quality_penalty(item: dict) -> bool:
+    return any(
+        explanation["signal"] == "quality" and explanation["weight"] < 0
+        for explanation in item.get("explanations", [])
+    )
 
 
 def extract_path_mentions(text: str) -> set[str]:

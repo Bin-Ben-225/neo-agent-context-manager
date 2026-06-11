@@ -7,6 +7,7 @@ All notable changes to NACM will be documented in this file.
 ### Added
 
 - Workstation relation index artifacts for Python modules, importers, and source-test links.
+- Relation-aware matcher boosts for related source, related tests, and importers when a relation index is present.
 - Prompt target adapter registry with `codex` and `claude-prompt` targets.
 - Prompt-only Claude-style template generation via `--target claude-prompt`.
 
