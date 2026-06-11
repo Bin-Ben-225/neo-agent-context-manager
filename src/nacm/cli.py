@@ -11,6 +11,7 @@ from nacm.indexer.matcher import match_files
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
+from nacm.session.planner import create_batch_plan
 from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import latest_task, list_tasks, save_task
 from nacm.validation import run_smoke_validation
@@ -119,6 +120,13 @@ def quick_command(text: str) -> None:
     else:
         console.print(f"Generated context pack. Clipboard copy failed: {error}")
         console.print(f"Prompt file: {prompt_path}")
+
+
+@app.command("plan")
+def plan_command(text: str) -> None:
+    require_initialized(Path.cwd())
+    plan_path = create_batch_plan(Path.cwd(), text)
+    console.print(f"Wrote batch plan: {plan_path}")
 
 
 @match_app.command("explain")
