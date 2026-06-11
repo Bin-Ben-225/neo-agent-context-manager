@@ -72,3 +72,12 @@ def test_doctor_passes_after_init_and_index(tmp_path: Path, monkeypatch):
 
     assert result.exit_code == 0
     assert "NACM doctor passed." in result.stdout
+
+
+def test_validate_smoke_runs_core_workflow(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(app, ["validate", "smoke"])
+
+    assert result.exit_code == 0
+    assert "Smoke passed:" in result.stdout

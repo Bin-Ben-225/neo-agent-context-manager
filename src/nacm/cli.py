@@ -11,11 +11,14 @@ from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
 from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import save_task
+from nacm.validation import run_smoke_validation
 from nacm.workspace import init_workspace
 
 app = typer.Typer(no_args_is_help=True)
 index_app = typer.Typer(no_args_is_help=True)
+validate_app = typer.Typer(no_args_is_help=True)
 app.add_typer(index_app, name="index")
+app.add_typer(validate_app, name="validate")
 console = Console()
 
 
@@ -61,7 +64,7 @@ def pack_command(target: str = typer.Option("codex", "--target")) -> None:
 def copy_command(target: str) -> None:
     require_initialized(Path.cwd())
     if target != "codex":
-        raise typer.BadParameter("Only `codex` is supported in Phase 1.")
+        raise typer.BadParameter("Only `codex` is supported in the current version.")
     try:
         ok, prompt_path, error = copy_codex_prompt(Path.cwd())
     except FileNotFoundError as exc:
@@ -112,6 +115,15 @@ def doctor_command() -> None:
         console.print("Run `nacm index build` first.")
         raise typer.Exit(code=1)
     console.print("NACM doctor passed.")
+
+
+@validate_app.command("smoke")
+def validate_smoke_command() -> None:
+    try:
+        smoke_path = run_smoke_validation()
+    except RuntimeError as exc:
+        fail(str(exc))
+    console.print(f"Smoke passed: {smoke_path}")
 
 
 @app.command("finalize")

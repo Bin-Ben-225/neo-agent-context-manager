@@ -2,6 +2,16 @@
 
 All notable changes to NACM will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- `nacm validate smoke` for running the core workflow smoke test from the CLI.
+
+### Changed
+
+- Improved public validation documentation with real-project validation notes.
+
 ## 0.1.0a1
 
 Initial alpha release candidate.

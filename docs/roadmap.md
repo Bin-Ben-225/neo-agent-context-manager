@@ -12,7 +12,7 @@
 - Done/finalize report
 - Basic tests and public documentation
 
-## Later Phases
+## Planned Improvements
 
 - Batch planning workflow
 - Better language-aware symbol extraction

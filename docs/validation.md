@@ -13,7 +13,20 @@ py -3.11 -m pip install -e .[dev]
 
 ## Smoke Test
 
-Run this PowerShell script:
+Run the built-in smoke validation:
+
+```powershell
+py -3.11 -m nacm validate smoke
+```
+
+Expected final output:
+
+```text
+Smoke passed: <temporary path>
+```
+
+The command creates a temporary Git repository, runs the core workflow, and verifies generated local files.
+The equivalent PowerShell flow is:
 
 ```powershell
 $ErrorActionPreference='Stop'
@@ -63,7 +76,7 @@ if ($checks -contains $false) {
 Write-Output "Smoke passed: $smoke"
 ```
 
-Expected final output:
+The final output is:
 
 ```text
 Smoke passed: <temporary path>
@@ -78,3 +91,35 @@ py -3.11 -m pytest tests -q
 py -3.11 -m ruff check .
 py -3.11 -m pip wheel . -w $env:TEMP\nacm-wheel-check
 ```
+
+## Real Project Validation
+
+The current workflow has also been checked against
+[`python-humanize/humanize`](https://github.com/python-humanize/humanize), a small Python library with source files,
+tests, documentation, localization files, and benchmark files.
+
+Use a fresh clone of the project and run:
+
+```powershell
+py -3.11 -m nacm init --profile low-memory
+py -3.11 -m nacm index build
+py -3.11 -m nacm doctor
+py -3.11 -m nacm status
+```
+
+Then run task-focused checks:
+
+```powershell
+py -3.11 -m nacm quick "check src/humanize/filesize.py naturalsize file size formatting logic"
+py -3.11 -m nacm quick "check humanize number intcomma intword logic and tests"
+py -3.11 -m nacm quick "check naturaltime naturalday date and time formatting logic"
+```
+
+Expected high-confidence matches:
+
+- Filesize task: `src/humanize/filesize.py`, `tests/test_filesize.py`
+- Number task: `src/humanize/number.py`, `tests/test_number.py`
+- Time task: `src/humanize/time.py`, `tests/test_time.py`
+
+Acceptable secondary matches include related documentation, package entry points, i18n tests, and benchmark files.
+Localization catalogs and typing marker files should not crowd out the core source and test files.

@@ -15,6 +15,7 @@ The current version focuses on:
 - Codex prompt generation
 - Clipboard copy for Codex prompts
 - Task finalization report with changed-file summaries, forbidden path checks, and large-change risk hints
+- Built-in smoke validation command
 
 This version does not implement Claude Code, MCP, plugins, hooks, embeddings, vector databases, GUI/TUI, background services, or automatic Git commits.
 
@@ -62,6 +63,12 @@ nacm done
 ```
 
 `done` writes `.agent/reports/latest_report.md` with Git status, diff stat, changed-file categories, forbidden path warnings, large-change risk hints, and index dirty state.
+
+Validate the core workflow with:
+
+```bash
+nacm validate smoke
+```
 
 ## Documentation
 
