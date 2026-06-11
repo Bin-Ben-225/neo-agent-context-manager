@@ -81,3 +81,23 @@ def test_validate_smoke_runs_core_workflow(tmp_path: Path, monkeypatch):
 
     assert result.exit_code == 0
     assert "Smoke passed:" in result.stdout
+
+
+def test_match_explain_prints_ranked_reasons(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "reporting.py").write_text(
+        "class ReportBuilder:\n"
+        "    def render_report(self):\n"
+        "        return 'ok'\n",
+        encoding="utf-8",
+    )
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+
+    result = runner.invoke(app, ["match", "explain", "fix ReportBuilder render_report output"])
+
+    assert result.exit_code == 0
+    assert "src/reporting.py" in result.stdout
+    assert "symbol: ReportBuilder" in result.stdout
+    assert "method: render_report" in result.stdout

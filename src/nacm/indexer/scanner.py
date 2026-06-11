@@ -59,6 +59,11 @@ def render_project_map(files: list[dict]) -> str:
 def render_module_index(files: list[dict]) -> str:
     lines = ["# Module Index", ""]
     for item in files:
-        symbols = ", ".join(item["classes"] + item["functions"]) or "no symbols"
+        symbols = ", ".join(
+            item["classes"]
+            + item["functions"]
+            + item.get("methods", [])
+            + item.get("test_functions", [])
+        ) or "no symbols"
         lines.append(f"- `{item['path']}`: {symbols}")
     return "\n".join(lines) + "\n"

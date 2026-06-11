@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 
 from nacm.adapters.codex import copy_codex_prompt, write_codex_prompt
+from nacm.indexer.matcher import match_files
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
@@ -17,8 +18,10 @@ from nacm.workspace import init_workspace
 app = typer.Typer(no_args_is_help=True)
 index_app = typer.Typer(no_args_is_help=True)
 validate_app = typer.Typer(no_args_is_help=True)
+match_app = typer.Typer(no_args_is_help=True)
 app.add_typer(index_app, name="index")
 app.add_typer(validate_app, name="validate")
+app.add_typer(match_app, name="match")
 console = Console()
 
 
@@ -89,6 +92,23 @@ def quick_command(text: str) -> None:
     else:
         console.print(f"Generated context pack. Clipboard copy failed: {error}")
         console.print(f"Prompt file: {prompt_path}")
+
+
+@match_app.command("explain")
+def match_explain_command(text: str, limit: int = typer.Option(8, "--limit")) -> None:
+    require_initialized(Path.cwd())
+    require_index(Path.cwd())
+    matches = match_files(Path.cwd(), text, limit=limit)
+    if not matches:
+        console.print("No matches found.")
+        return
+    for item in matches:
+        console.print(f"{item['path']} [{item['confidence']}, score {item['score']}]")
+        for explanation in item.get("explanations", []):
+            console.print(
+                f"  - {explanation['signal']}: {explanation['detail']} "
+                f"({explanation['weight']:+d})"
+            )
 
 
 @app.command("done")

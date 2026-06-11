@@ -10,8 +10,9 @@ The current version focuses on:
 
 - Local `.agent/` workspace
 - Low-memory and workstation profiles
-- Lightweight path and file-header index
+- Lightweight path and Python-aware file-header index
 - Task-level context pack generation
+- Match explanations for relevant file selection
 - Codex prompt generation
 - Clipboard copy for Codex prompts
 - Task finalization report with changed-file summaries, forbidden path checks, and large-change risk hints
@@ -68,6 +69,12 @@ Validate the core workflow with:
 
 ```bash
 nacm validate smoke
+```
+
+Inspect why NACM selected files for a task:
+
+```bash
+nacm match explain "fix image loading path issue"
 ```
 
 ## Documentation

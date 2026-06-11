@@ -57,6 +57,9 @@ def render_file_summary(item: dict) -> list[str]:
     imports = _join_limited(item.get("imports", []), 6)
     classes = _join_limited(item.get("classes", []), 6)
     functions = _join_limited(item.get("functions", []), 8)
+    methods = _join_limited(item.get("methods", []), 8)
+    test_functions = _join_limited(item.get("test_functions", []), 8)
+    exports = _join_limited(item.get("exports", []), 8)
     keywords = _join_limited(item.get("keywords", []), 10)
     reasons = _join_limited(item.get("reasons", []), 6)
     if imports:
@@ -65,6 +68,12 @@ def render_file_summary(item: dict) -> list[str]:
         lines.append(f"  - Classes: {classes}")
     if functions:
         lines.append(f"  - Functions: {functions}")
+    if methods:
+        lines.append(f"  - Methods: {methods}")
+    if test_functions:
+        lines.append(f"  - Tests: {test_functions}")
+    if exports:
+        lines.append(f"  - Exports: {exports}")
     if keywords:
         lines.append(f"  - Keywords: {keywords}")
     if reasons:
@@ -75,4 +84,3 @@ def render_file_summary(item: dict) -> list[str]:
 def _join_limited(values: list[str], limit: int) -> str:
     clean = [str(value) for value in values if value]
     return ", ".join(clean[:limit])
-

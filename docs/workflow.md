@@ -28,6 +28,14 @@ To inspect local NACM state at any time:
 nacm status
 ```
 
+To inspect why files would be selected for a task:
+
+```bash
+nacm match explain "fix image loading path issue"
+```
+
+The explain output lists ranked files, confidence, score, and the signals that contributed to the match.
+
 ## Finish A Task
 
 ```bash

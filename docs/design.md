@@ -34,8 +34,9 @@ NACM writes `.agent/` to `.git/info/exclude` when the target project is a Git re
 NACM uses only lightweight signals:
 
 - L0 path metadata: relative POSIX path, size, mtime, extension, and directory depth.
-- L1 file header summary: imports, class/function names, and keywords from the first file header chunk.
-- Task matching: explicit path mentions, filename stems, path keywords, and summary keyword scoring.
+- L1 file header summary: imports, class/function names, methods, test functions, exports, doc keywords, and general keywords from the first file header chunk.
+- Task matching: explicit path mentions, filename stems, path keywords, Python symbols, summary keyword scoring, and low-value file demotion.
+- Match explanations: ranked files include the signals and weights that contributed to selection.
 
 The index never performs full semantic indexing, embedding, vector search, full-file hashing, or realtime watching.
 

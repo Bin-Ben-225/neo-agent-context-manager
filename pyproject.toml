@@ -32,6 +32,7 @@ packages = ["src/nacm"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+norecursedirs = ["tests/fixtures"]
 
 [tool.ruff]
 line-length = 100

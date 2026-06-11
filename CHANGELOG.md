@@ -7,10 +7,14 @@ All notable changes to NACM will be documented in this file.
 ### Added
 
 - `nacm validate smoke` for running the core workflow smoke test from the CLI.
+- `nacm match explain` for inspecting ranked file matches and score signals.
+- Local matcher quality fixtures covering source, tests, benchmark, localization, and typing-marker files.
 
 ### Changed
 
 - Improved public validation documentation with real-project validation notes.
+- Improved Python file summaries with imports, methods, test functions, exports, and doc keywords.
+- Ignored Python cache directories during index builds.
 
 ## 0.1.0a1
 

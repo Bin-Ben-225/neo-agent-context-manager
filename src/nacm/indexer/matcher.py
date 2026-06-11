@@ -41,50 +41,43 @@ def match_files(root: Path, task_text: str, limit: int = 8) -> list[dict]:
     files = json.loads(summary_path.read_text(encoding="utf-8")).get("files", [])
     explicit_paths = extract_path_mentions(task_text)
     keywords = extract_query_keywords(task_text, explicit_paths)
+    semantic_keywords = extract_semantic_keywords(task_text, explicit_paths)
     common_path_terms = common_path_tokens(files)
     scored = []
     for item in files:
         path = item["path"].lower()
         path_name = Path(item["path"]).name.lower()
         stem_words = set(extract_keywords(Path(item["path"]).stem.replace("_", " ").replace("-", " ")))
-        haystacks = [
-            path,
-            " ".join(item.get("imports", [])).lower(),
-            " ".join(item.get("classes", [])).lower(),
-            " ".join(item.get("functions", [])).lower(),
-            " ".join(item.get("keywords", [])).lower(),
-        ]
         score = 0
-        reasons = []
+        explanations: list[dict] = []
         for mention in explicit_paths:
             if mention == path or mention == path_name or path.endswith(f"/{mention}"):
-                score += 12
-                reasons.append("explicit path")
+                score += add_explanation(explanations, "explicit path", mention, 12)
             elif path_name == Path(mention).name:
-                score += 6
-                reasons.append("explicit filename")
+                score += add_explanation(explanations, "explicit filename", Path(mention).name, 6)
         for keyword in keywords:
             if keyword in path and keyword not in common_path_terms:
-                score += 3
-                reasons.append(f"path:{keyword}")
+                score += add_explanation(explanations, "path", keyword, 3)
             if keyword in stem_words:
-                score += 3
-                reasons.append(f"filename:{keyword}")
-            symbol_score = symbol_match_score(keyword, item)
-            if symbol_score:
-                score += symbol_score
-                reasons.append(f"symbol:{keyword}")
-            elif keyword in haystacks[4] or keyword in haystacks[1]:
-                score += 1
-                reasons.append(f"summary:{keyword}")
-        score += file_quality_adjustment(item, keywords)
-        if score > 0:
+                score += add_explanation(explanations, "filename", keyword, 3)
+            symbol_explanation = symbol_match_explanation(keyword, item)
+            if symbol_explanation:
+                explanations.append(symbol_explanation)
+                score += symbol_explanation["weight"]
+            elif summary_match(keyword, item):
+                score += add_explanation(explanations, "summary", keyword, 1)
+        positive_score = score
+        quality_explanations = file_quality_explanations(item, semantic_keywords)
+        explanations.extend(quality_explanations)
+        score += sum(explanation["weight"] for explanation in quality_explanations)
+        if score > 0 or (score == 0 and positive_score > 0):
             scored.append(
                 {
                     **item,
                     "score": score,
                     "confidence": _confidence(score),
-                    "reasons": sorted(set(reasons)),
+                    "reasons": explanation_reasons(explanations),
+                    "explanations": explanations,
                 }
             )
     scored.sort(key=lambda item: (-item["score"], item["path"]))
@@ -104,6 +97,14 @@ def extract_query_keywords(task_text: str, explicit_paths: set[str]) -> list[str
         path_stems.extend(extract_keywords(Path(mention).stem.replace("_", " ").replace("-", " ")))
     keywords = extract_keywords(scrubbed)
     return dedupe_keywords([*keywords, *path_stems])
+
+
+def extract_semantic_keywords(task_text: str, explicit_paths: set[str]) -> list[str]:
+    scrubbed = task_text
+    for mention in explicit_paths:
+        scrubbed = scrubbed.replace(mention, " ")
+        scrubbed = scrubbed.replace(mention.replace("/", "\\"), " ")
+    return dedupe_keywords(extract_keywords(scrubbed))
 
 
 def dedupe_keywords(words: list[str]) -> list[str]:
@@ -129,30 +130,88 @@ def common_path_tokens(files: list[dict]) -> set[str]:
 
 
 def symbol_match_score(keyword: str, item: dict) -> int:
-    functions = [str(value).lower() for value in item.get("functions", [])]
-    classes = [str(value).lower() for value in item.get("classes", [])]
-    if keyword in functions or keyword in classes:
-        return 5
-    if any(symbol == f"test_{keyword}" for symbol in functions):
-        return 4
-    if any(symbol.endswith(f"_{keyword}") for symbol in functions):
-        return 3
-    return 0
+    explanation = symbol_match_explanation(keyword, item)
+    return explanation["weight"] if explanation else 0
+
+
+def symbol_match_explanation(keyword: str, item: dict) -> dict | None:
+    lowered = keyword.lower()
+    symbol_values = [*item.get("functions", []), *item.get("classes", []), *item.get("exports", [])]
+    for value in symbol_values:
+        text = str(value)
+        if lowered == text.lower():
+            return {"signal": "symbol", "detail": text, "weight": 5}
+    for value in item.get("methods", []):
+        text = str(value)
+        short_name = text.rsplit(".", 1)[-1]
+        if lowered in {text.lower(), short_name.lower()}:
+            return {"signal": "method", "detail": short_name, "weight": 5}
+    for value in item.get("test_functions", []):
+        text = str(value)
+        if lowered == text.lower():
+            return {"signal": "test", "detail": text, "weight": 5}
+        if text.lower() == f"test_{lowered}":
+            return {"signal": "test", "detail": text, "weight": 4}
+    for value in [*item.get("functions", []), *item.get("methods", [])]:
+        text = str(value)
+        short_name = text.rsplit(".", 1)[-1]
+        if short_name.lower().endswith(f"_{lowered}"):
+            return {"signal": "symbol", "detail": short_name, "weight": 3}
+    return None
+
+
+def summary_match(keyword: str, item: dict) -> bool:
+    haystack = " ".join(
+        str(value)
+        for field in ("imports", "keywords", "doc_keywords")
+        for value in item.get(field, [])
+    ).lower()
+    return keyword in haystack
+
+
+def add_explanation(explanations: list[dict], signal: str, detail: str, weight: int) -> int:
+    explanations.append({"signal": signal, "detail": detail, "weight": weight})
+    return weight
+
+
+def explanation_reasons(explanations: list[dict]) -> list[str]:
+    reasons = []
+    for explanation in explanations:
+        signal = explanation["signal"]
+        detail = explanation["detail"]
+        weight = explanation["weight"]
+        if weight < 0:
+            reasons.append(f"{signal}:{detail}")
+        elif signal in {"explicit path", "explicit filename"}:
+            reasons.append(signal)
+        else:
+            reasons.append(f"{signal}:{detail}")
+    return sorted(set(reasons))
 
 
 def file_quality_adjustment(item: dict, query_keywords: list[str] | None = None) -> int:
+    return sum(explanation["weight"] for explanation in file_quality_explanations(item, query_keywords))
+
+
+def file_quality_explanations(item: dict, query_keywords: list[str] | None = None) -> list[dict]:
     path = Path(item["path"])
     suffix = path.suffix.lower()
     parts = {part.lower() for part in path.parts}
     query_words = set(query_keywords or [])
-    adjustment = 0
+    explanations = []
     if suffix in LOW_VALUE_EXTENSIONS:
-        adjustment -= 6
+        explanations.append({"signal": "quality", "detail": f"{suffix} file demoted", "weight": -6})
     if parts & LOW_VALUE_PATH_PARTS:
-        adjustment -= 6
+        explanations.append({"signal": "quality", "detail": "localization path demoted", "weight": -6})
     if "benchmark" in path.stem.lower() and not (query_words & {"benchmark", "benchmarks", "性能"}):
-        adjustment -= 6
-    return adjustment
+        explanations.append(
+            {
+                "signal": "quality",
+                "detail": "benchmark file demoted for non-benchmark task",
+                "weight": -6,
+            }
+        )
+    return explanations
 
 
 def _confidence(score: int) -> str:

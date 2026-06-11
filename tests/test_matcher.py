@@ -78,6 +78,42 @@ def test_match_files_matches_function_and_class_names(tmp_path: Path):
 
     assert matches[0]["path"] == "src/reporting.py"
     assert matches[0]["score"] >= 2
+    assert {
+        "signal": "symbol",
+        "detail": "render_report",
+        "weight": 5,
+    } in matches[0]["explanations"]
+
+
+def test_match_files_explains_explicit_path_and_quality_adjustments(tmp_path: Path):
+    write_summary(
+        tmp_path,
+        [
+            {
+                "path": "tests/test_benchmarks.py",
+                "imports": ["humanize"],
+                "classes": [],
+                "functions": ["test_naturalday"],
+                "methods": [],
+                "test_functions": ["test_naturalday"],
+                "keywords": ["benchmark", "time"],
+            }
+        ],
+    )
+
+    matches = match_files(tmp_path, "check tests/test_benchmarks.py naturalday behavior")
+
+    assert matches[0]["path"] == "tests/test_benchmarks.py"
+    assert {
+        "signal": "explicit path",
+        "detail": "tests/test_benchmarks.py",
+        "weight": 12,
+    } in matches[0]["explanations"]
+    assert {
+        "signal": "quality",
+        "detail": "benchmark file demoted for non-benchmark task",
+        "weight": -6,
+    } in matches[0]["explanations"]
 
 
 def test_match_files_keeps_filesize_task_focused_on_source_and_tests(tmp_path: Path):

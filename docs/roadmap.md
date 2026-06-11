@@ -6,6 +6,8 @@
 - Low-memory and workstation profiles
 - Lightweight index build
 - Task capture and relevant file matching
+- Match explanations and local matcher quality fixtures
+- Python-aware symbol extraction
 - Context pack generation
 - Codex prompt generation and clipboard copy
 - Quick workflow
@@ -15,7 +17,6 @@
 ## Planned Improvements
 
 - Batch planning workflow
-- Better language-aware symbol extraction
 - Workstation-generated enhanced indexes
 - Optional Claude Code prompt-only support
 - Optional Codex Skill or Plugin integration after separate design review

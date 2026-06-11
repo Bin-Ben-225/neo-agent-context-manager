@@ -11,6 +11,7 @@ IGNORED_DIRS = {
     "target",
     ".cache",
     ".pytest_cache",
+    "__pycache__",
     "logs",
     "output",
     "samples",
@@ -28,6 +29,7 @@ FORBIDDEN_PATHS = [
     "target/",
     ".cache/",
     ".pytest_cache/",
+    "__pycache__/",
 ]
 
 SOURCE_EXTENSIONS = {
