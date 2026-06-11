@@ -1,6 +1,6 @@
 # NACM Design
 
-NACM is a local CLI that prepares small, task-focused context packs for AI coding agents on low-memory machines. The current version is Codex-first and prompt-only: it does not run an agent, contact cloud services, start a background process, or upload project code.
+NACM is a local CLI that prepares small, task-focused context packs for AI coding agents on low-memory machines. The current version is Codex-first and prompt-only, with a prompt-only secondary target for Claude-style workflows: it does not run an agent, contact cloud services, start a background process, or upload project code.
 
 ## Scope
 
@@ -13,7 +13,7 @@ nacm quick "fix image loading path issue"
 nacm done
 ```
 
-Claude Code, MCP, plugins, hooks, semantic indexing, embeddings, GUI/TUI, and background watchers are outside the current scope.
+Claude Code hooks, MCP, plugins, semantic indexing, embeddings, GUI/TUI, and background watchers are outside the current scope.
 
 ## Local Workspace
 
@@ -26,7 +26,7 @@ NACM writes `.agent/` to `.git/info/exclude` when the target project is a Git re
 - `workspace`: initializes `.agent/`, default profiles, local config, and Git exclude rules.
 - `indexer`: scans paths, skips ignored directories, reads only small file headers, and writes lightweight index files.
 - `session`: stores the current task, builds context packs, and generates completion reports.
-- `adapters.codex`: renders Codex prompt files and copies them to the clipboard.
+- `adapters`: renders prompt files for supported targets and copies prompts when a target supports clipboard copy.
 - `utils`: isolates path, Git, platform, and clipboard behavior.
 
 ## Indexing And Matching
@@ -72,6 +72,13 @@ If project files changed after the last index build, NACM writes `.agent/cache/i
 ## Codex Prompt
 
 The generated Codex prompt tells Codex to read `.agent/sessions/context_pack.md` first, prioritize High Confidence files, avoid full-repository scanning, avoid forbidden paths, avoid `.agent/`, avoid creating or editing root `AGENTS.md`, provide a plan before changes, and remind the user to run `nacm done`.
+
+## Prompt Targets
+
+Supported prompt targets are:
+
+- `codex`: writes `.agent/codex/codex_prompt.md` and supports clipboard copy.
+- `claude-prompt`: writes `.agent/claude/claude_prompt.md` for prompt-only Claude-style use. It does not install hooks, use MCP, run plugins, or start background services.
 
 ## Safety
 

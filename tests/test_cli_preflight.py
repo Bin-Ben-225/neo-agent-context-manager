@@ -38,3 +38,13 @@ def test_pack_requires_current_task(tmp_path: Path, monkeypatch):
 
     assert result.exit_code == 1
     assert "Run `nacm task" in result.stdout
+
+
+def test_copy_rejects_unsupported_target_with_supported_list(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(app, ["init"])
+
+    result = runner.invoke(app, ["copy", "unknown"])
+
+    assert result.exit_code == 1
+    assert "Supported targets" in result.stdout

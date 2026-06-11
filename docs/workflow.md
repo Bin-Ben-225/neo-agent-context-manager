@@ -22,6 +22,14 @@ This command stores the task, generates `.agent/sessions/context_pack.md`, rende
 
 Paste the prompt into Codex and let Codex work inside the same project.
 
+For a prompt-only Claude-style workflow:
+
+```bash
+nacm quick "fix image loading path issue" --target claude-prompt
+```
+
+This writes `.agent/claude/claude_prompt.md`. NACM does not install hooks, run Claude Code, or start background services.
+
 To inspect local NACM state at any time:
 
 ```bash

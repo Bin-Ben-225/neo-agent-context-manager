@@ -97,6 +97,41 @@ def test_pack_respects_max_files_and_can_include_explanations(tmp_path: Path, mo
     assert "Included file budget: 1" in context_pack
 
 
+def test_pack_can_write_claude_prompt_target(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+    runner.invoke(app, ["task", "set", "fix src/app.py"])
+
+    result = runner.invoke(app, ["pack", "--target", "claude-prompt"])
+
+    assert result.exit_code == 0
+    assert "Wrote claude-prompt prompt:" in result.stdout
+    prompt_path = tmp_path / ".agent" / "claude" / "claude_prompt.md"
+    assert prompt_path.exists()
+    assert "Do not use hooks, MCP, plugins, or background services." in prompt_path.read_text(
+        encoding="utf-8"
+    )
+
+
+def test_quick_can_generate_claude_prompt_without_clipboard_copy(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+
+    result = runner.invoke(app, ["quick", "fix src/app.py", "--target", "claude-prompt"])
+
+    assert result.exit_code == 0
+    assert "Generated context pack." in result.stdout
+    assert "Target `claude-prompt` does not" in result.stdout
+    assert "support clipboard copy." in result.stdout
+    assert (tmp_path / ".agent" / "claude" / "claude_prompt.md").exists()
+
+
 def test_done_generates_report_with_forbidden_path_warning(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)

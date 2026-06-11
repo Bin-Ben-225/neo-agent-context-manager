@@ -6,7 +6,7 @@ import sys
 import typer
 from rich.console import Console
 
-from nacm.adapters.codex import copy_codex_prompt, write_codex_prompt
+from nacm.adapters.registry import copy_prompt, write_prompt
 from nacm.indexer.matcher import match_files
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
@@ -95,19 +95,19 @@ def pack_command(
     except ValueError as exc:
         fail(str(exc))
     console.print(f"Wrote context pack: {result['context_pack']}")
-    if target == "codex":
-        prompt_path = write_codex_prompt(Path.cwd())
-        console.print(f"Wrote Codex prompt: {prompt_path}")
+    try:
+        prompt_path = write_prompt(Path.cwd(), target)
+    except ValueError as exc:
+        fail(str(exc))
+    console.print(f"Wrote {target} prompt: {prompt_path}")
 
 
 @app.command("copy")
 def copy_command(target: str) -> None:
     require_initialized(Path.cwd())
-    if target != "codex":
-        raise typer.BadParameter("Only `codex` is supported in the current version.")
     try:
-        ok, prompt_path, error = copy_codex_prompt(Path.cwd())
-    except FileNotFoundError as exc:
+        ok, prompt_path, error = copy_prompt(Path.cwd(), target)
+    except (FileNotFoundError, ValueError) as exc:
         fail(str(exc))
     if ok:
         console.print("Copied Codex prompt to clipboard.")
@@ -119,17 +119,21 @@ def copy_command(target: str) -> None:
 @app.command("quick")
 def quick_command(
     text: str,
+    target: str = typer.Option("codex", "--target"),
     max_files: int | None = typer.Option(None, "--max-files"),
     explain: bool = typer.Option(False, "--explain"),
 ) -> None:
     require_initialized(Path.cwd())
     require_index(Path.cwd())
     save_task(Path.cwd(), text)
-    build_context_pack(Path.cwd(), target="codex", max_files=max_files, include_explanations=explain)
-    write_codex_prompt(Path.cwd())
-    ok, prompt_path, error = copy_codex_prompt(Path.cwd())
+    build_context_pack(Path.cwd(), target=target, max_files=max_files, include_explanations=explain)
+    try:
+        write_prompt(Path.cwd(), target)
+        ok, prompt_path, error = copy_prompt(Path.cwd(), target)
+    except ValueError as exc:
+        fail(str(exc))
     if ok:
-        console.print("Generated context pack and copied Codex prompt.")
+        console.print(f"Generated context pack and copied {target} prompt.")
     else:
         console.print(f"Generated context pack. Clipboard copy failed: {error}")
         console.print(f"Prompt file: {prompt_path}")

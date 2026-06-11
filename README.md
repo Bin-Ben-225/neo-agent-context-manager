@@ -2,7 +2,7 @@
 
 A lightweight local context manager for AI coding agents on low-memory devices.
 
-NACM prepares small, task-focused context packs so Codex can work with fewer broad scans and less local I/O. The current version is Codex-first and prompt-only.
+NACM prepares small, task-focused context packs so Codex can work with fewer broad scans and less local I/O. The current version is Codex-first and prompt-only, with a prompt-only secondary target for Claude-style workflows.
 
 ## Current Capabilities
 
@@ -15,12 +15,13 @@ The current version focuses on:
 - Task history and prompt-only batch planning
 - Context pack file-budget controls
 - Match explanations for relevant file selection
+- Prompt target adapters for `codex` and `claude-prompt`
 - Codex prompt generation
 - Clipboard copy for Codex prompts
 - Task finalization report with changed-file summaries, forbidden path checks, and large-change risk hints
 - Built-in smoke validation command
 
-This version does not implement Claude Code, MCP, plugins, hooks, embeddings, vector databases, GUI/TUI, background services, or automatic Git commits.
+This version does not implement Claude Code hooks, MCP, plugins, embeddings, vector databases, GUI/TUI, background services, or automatic Git commits.
 
 ## Install For Development
 
@@ -77,6 +78,12 @@ Inspect why NACM selected files for a task:
 
 ```bash
 nacm match explain "fix image loading path issue"
+```
+
+Generate a prompt-only Claude-style prompt:
+
+```bash
+nacm quick "fix image loading path issue" --target claude-prompt
 ```
 
 For a larger request, create a local prompt-only batch plan:

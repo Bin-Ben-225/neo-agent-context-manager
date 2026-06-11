@@ -12,6 +12,7 @@
 - Workstation relation index for Python modules, imports, and source-test links
 - Context pack generation
 - Context pack budget controls
+- Prompt adapter targets for Codex and prompt-only Claude-style workflows
 - Codex prompt generation and clipboard copy
 - Quick workflow
 - Done/finalize report
@@ -19,7 +20,7 @@
 
 ## Planned Improvements
 
-- Optional Claude Code prompt-only support
+- Target-specific prompt quality improvements
 - Optional Codex Skill or Plugin integration after separate design review
 - Optional Claude hooks after separate design review
 
