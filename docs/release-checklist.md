@@ -24,6 +24,7 @@ py -3.11 -m nacm validate smoke
 .\scripts\validate-hooks.ps1
 .\scripts\build-release.ps1
 .\scripts\validate-install.ps1
+.\scripts\write-release-manifest.ps1
 py -3.11 -m pip wheel . -w $env:TEMP\nacm-wheel-check
 ```
 
@@ -64,3 +65,15 @@ git push origin v0.1.0-alpha.X
 ```
 
 After tagging, avoid moving the tag. Put follow-up changes in `CHANGELOG.md` under `Unreleased`.
+
+## GitHub Release
+
+Upload the wheel, source distribution, and generated manifest:
+
+```text
+dist/neo_agent_context_manager-<version>-py3-none-any.whl
+dist/neo_agent_context_manager-<version>.tar.gz
+dist/release-manifest.json
+```
+
+Mark alpha releases as pre-release.

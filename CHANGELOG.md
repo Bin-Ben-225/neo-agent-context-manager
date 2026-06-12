@@ -4,6 +4,11 @@ All notable changes to NACM will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Distribution guide covering GitHub Release artifacts, PyPI, Homebrew, WinGet, pipx, and uv install paths.
+- Release manifest script for recording artifact size and SHA256 checksums.
+
 ## 0.1.0a5
 
 Fifth alpha release candidate.

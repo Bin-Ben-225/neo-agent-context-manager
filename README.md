@@ -151,6 +151,7 @@ nacm plan "refactor matcher and add tests"
 - [Workflow](docs/workflow.md)
 - [Examples](docs/examples.md)
 - [Installation](docs/install.md)
+- [Distribution](docs/distribution.md)
 - [Hooks](docs/hooks.md)
 - [Hook Compatibility Notes](docs/hook-compatibility.md)
 - [Validation](docs/validation.md)
