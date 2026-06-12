@@ -4,6 +4,18 @@ All notable changes to NACM will be documented in this file.
 
 ## Unreleased
 
+## 0.1.0a5
+
+Fifth alpha release candidate.
+
+### Added
+
+- Real benchmark results and benchmark reporting with commit, version, and timing fields.
+- Expanded stats JSON with task metadata, selected file paths, max file budget, and context budget usage.
+- Stats history snapshots written by `nacm done` with `nacm stats --history` summary output.
+- Hook install/uninstall all-target support, target-scoped hook doctor, and post-install verification hints.
+- Version output via `nacm --version`.
+
 ## 0.1.0a4
 
 Fourth alpha release candidate.
@@ -16,9 +28,6 @@ Fourth alpha release candidate.
 - Efficiency stats command and context/report summaries showing indexed files, selected context files, and file reduction percentage.
 - Benchmark script and public benchmark results document for tracking file reduction on real projects.
 - Hook doctor and verbose hook status output for checking local hook installation details.
-- Expanded stats JSON with task metadata, selected file paths, max file budget, and context budget usage.
-- Stats history snapshots written by `nacm done` with `nacm stats --history` summary output.
-- Hook install/uninstall all-target support, target-scoped hook doctor, and post-install verification hints.
 - Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
 
 ## 0.1.0a3

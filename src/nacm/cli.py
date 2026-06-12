@@ -25,6 +25,7 @@ from nacm.session.stats import collect_stats, render_history, render_stats, stat
 from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import latest_task, list_tasks, save_task
 from nacm.validation import run_smoke_validation
+from nacm.version import package_version
 from nacm.workspace import init_workspace
 
 app = typer.Typer(no_args_is_help=True)
@@ -39,6 +40,25 @@ app.add_typer(match_app, name="match")
 app.add_typer(task_app, name="task")
 app.add_typer(hook_app, name="hook")
 console = Console()
+
+
+def version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"nacm {package_version()}")
+        raise typer.Exit()
+
+
+@app.callback()
+def app_callback(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        help="Show NACM version and exit.",
+        callback=version_callback,
+        is_eager=True,
+    ),
+) -> None:
+    _ = version
 
 
 @app.command("init")
