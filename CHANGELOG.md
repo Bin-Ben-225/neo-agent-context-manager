@@ -16,6 +16,7 @@ Fourth alpha release candidate.
 - Efficiency stats command and context/report summaries showing indexed files, selected context files, and file reduction percentage.
 - Benchmark script and public benchmark results document for tracking file reduction on real projects.
 - Hook doctor and verbose hook status output for checking local hook installation details.
+- Expanded stats JSON with task metadata, selected file paths, max file budget, and context budget usage.
 - Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
 
 ## 0.1.0a3

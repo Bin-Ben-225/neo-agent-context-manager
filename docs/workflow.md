@@ -38,6 +38,7 @@ nacm stats
 ```
 
 `nacm stats` reports indexed files, selected context files, context size, and file reduction percentage for the latest context pack.
+Use `nacm stats --json` when benchmark or reporting scripts need task metadata, selected file paths, and context budget usage.
 
 To inspect why files would be selected for a task:
 
