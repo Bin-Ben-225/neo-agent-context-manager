@@ -34,7 +34,10 @@ To inspect local NACM state at any time:
 
 ```bash
 nacm status
+nacm stats
 ```
+
+`nacm stats` reports indexed files, selected context files, context size, and file reduction percentage for the latest context pack.
 
 To inspect why files would be selected for a task:
 
@@ -76,6 +79,7 @@ The report includes:
 - forbidden path checks
 - large-change risk
 - index dirty state
+- efficiency summary
 - next action guidance
 
 If project files changed after the last index build, NACM writes `.agent/cache/index_state.json` and recommends rebuilding the index when useful.

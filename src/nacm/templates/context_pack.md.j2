@@ -1,4 +1,5 @@
 # NACM Context Pack
+{% set efficiency = efficiency | default({"indexed_files": 0, "context_files": matched | length, "file_reduction_percent": 0.0}) %}
 
 ## Current Task
 
@@ -7,6 +8,12 @@
 ## Task Mode
 
 Small Change Mode unless the work clearly needs a plan first.
+
+## Efficiency Summary
+
+- Indexed files: {{ efficiency.indexed_files }}
+- Context files: {{ efficiency.context_files }}
+- File reduction: {{ "%.1f"|format(efficiency.file_reduction_percent) }}%
 
 ## Relevant Files
 

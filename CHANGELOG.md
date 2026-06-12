@@ -13,6 +13,7 @@ Fourth alpha release candidate.
 - Project-local UserPromptSubmit hook installer, status, uninstall, and JSON runner for Codex and Claude Code.
 - Hook compatibility hardening with platform-specific commands, longer hook timeout, legacy uninstall cleanup, and observed payload notes.
 - Hook validation script and release checklist coverage for Codex-shaped and Claude Code-shaped payloads.
+- Efficiency stats command and context/report summaries showing indexed files, selected context files, and file reduction percentage.
 - Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
 
 ## 0.1.0a3

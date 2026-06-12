@@ -81,3 +81,12 @@ def test_hooks_doc_describes_local_project_hook_workflow():
     assert "Access is denied" in compatibility
     assert "commandWindows" in compatibility
     assert "Hooks" in readme
+
+
+def test_readme_and_workflow_document_stats_command():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    workflow = (ROOT / "docs" / "workflow.md").read_text(encoding="utf-8")
+
+    assert "nacm stats" in readme
+    assert "nacm stats" in workflow
+    assert "file reduction percentage" in workflow
