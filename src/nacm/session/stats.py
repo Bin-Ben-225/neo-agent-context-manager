@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 from nacm.utils.paths import agent_dir
@@ -71,6 +72,50 @@ def stats_to_dict(stats: EfficiencyStats) -> dict[str, int | float]:
         "context_budget_usage_percent": stats.context_budget_usage_percent,
         "task": stats.task,
     }
+
+
+def append_stats_history(root: Path) -> Path:
+    history_path = stats_history_path(root)
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = stats_to_dict(collect_stats(root))
+    payload["recorded_at"] = datetime.now(timezone.utc).isoformat()
+    with history_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    return history_path
+
+
+def stats_history(root: Path, limit: int = 20) -> list[dict]:
+    path = stats_history_path(root)
+    if not path.exists():
+        return []
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            rows.append(json.loads(line))
+    return rows[-limit:]
+
+
+def render_history(history: list[dict]) -> str:
+    if not history:
+        return "No stats history found.\n"
+    reductions = [float(item.get("file_reduction_percent", 0.0)) for item in history]
+    context_files = [int(item.get("context_files", 0)) for item in history]
+    latest = history[-1]
+    return "\n".join(
+        [
+            "NACM Stats History",
+            f"Recent task count: {len(history)}",
+            f"Average file reduction: {sum(reductions) / len(reductions):.1f}%",
+            f"Average context files: {sum(context_files) / len(context_files):.1f}",
+            f"Latest task: {latest.get('task', {}).get('text', '')}",
+            f"Latest file reduction: {float(latest.get('file_reduction_percent', 0.0)):.1f}%",
+            "",
+        ]
+    )
+
+
+def stats_history_path(root: Path) -> Path:
+    return agent_dir(root) / "reports" / "history" / "stats.jsonl"
 
 
 def count_context_files(context_text: str) -> int:

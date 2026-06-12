@@ -4,8 +4,9 @@ from typer.testing import CliRunner
 
 from nacm.cli import app
 from nacm.indexer.scanner import build_index
+from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
-from nacm.session.stats import collect_stats, render_stats
+from nacm.session.stats import collect_stats, render_history, render_stats, stats_history
 from nacm.session.task import save_task
 from nacm.workspace import init_workspace
 
@@ -100,3 +101,26 @@ def test_stats_json_includes_task_and_selected_paths(tmp_path: Path, monkeypatch
     assert payload["selected_file_paths"] == ["src/app.py"]
     assert payload["max_file_budget"] == 1
     assert payload["context_budget_usage_percent"] == 100.0
+
+
+def test_finalize_writes_stats_history_and_cli_can_render_history(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+    init_workspace(tmp_path)
+    build_index(tmp_path)
+    save_task(tmp_path, "inspect app")
+    build_context_pack(tmp_path, max_files=1)
+
+    finalize(tmp_path)
+
+    history = stats_history(tmp_path)
+    assert len(history) == 1
+    assert history[0]["task"]["text"] == "inspect app"
+    assert "Average file reduction:" in render_history(history)
+
+    result = runner.invoke(app, ["stats", "--history"])
+
+    assert result.exit_code == 0
+    assert "Recent task count: 1" in result.stdout
+    assert "Average file reduction:" in result.stdout

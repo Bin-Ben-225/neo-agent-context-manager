@@ -14,7 +14,7 @@ from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
 from nacm.session.planner import create_batch_plan
-from nacm.session.stats import collect_stats, render_stats, stats_to_dict
+from nacm.session.stats import collect_stats, render_history, render_stats, stats_history, stats_to_dict
 from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import latest_task, list_tasks, save_task
 from nacm.validation import run_smoke_validation
@@ -181,9 +181,19 @@ def status_command() -> None:
 
 
 @app.command("stats")
-def stats_command(json_output: bool = typer.Option(False, "--json")) -> None:
+def stats_command(
+    json_output: bool = typer.Option(False, "--json"),
+    history: bool = typer.Option(False, "--history"),
+) -> None:
     require_initialized(Path.cwd())
     require_index(Path.cwd())
+    if history:
+        rows = stats_history(Path.cwd())
+        if json_output:
+            typer.echo(json.dumps(rows, ensure_ascii=False))
+        else:
+            console.print(render_history(rows))
+        return
     stats = collect_stats(Path.cwd())
     if json_output:
         typer.echo(json.dumps(stats_to_dict(stats), ensure_ascii=False))

@@ -17,6 +17,7 @@ Fourth alpha release candidate.
 - Benchmark script and public benchmark results document for tracking file reduction on real projects.
 - Hook doctor and verbose hook status output for checking local hook installation details.
 - Expanded stats JSON with task metadata, selected file paths, max file budget, and context budget usage.
+- Stats history snapshots written by `nacm done` with `nacm stats --history` summary output.
 - Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
 
 ## 0.1.0a3

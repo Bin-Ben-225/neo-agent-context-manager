@@ -39,6 +39,7 @@ nacm stats
 
 `nacm stats` reports indexed files, selected context files, context size, and file reduction percentage for the latest context pack.
 Use `nacm stats --json` when benchmark or reporting scripts need task metadata, selected file paths, and context budget usage.
+After `nacm done`, NACM appends a local stats snapshot. Use `nacm stats --history` to review recent average file reduction and context file counts.
 
 To inspect why files would be selected for a task:
 
@@ -81,6 +82,7 @@ The report includes:
 - large-change risk
 - index dirty state
 - efficiency summary
+- stats history snapshot
 - next action guidance
 
 If project files changed after the last index build, NACM writes `.agent/cache/index_state.json` and recommends rebuilding the index when useful.

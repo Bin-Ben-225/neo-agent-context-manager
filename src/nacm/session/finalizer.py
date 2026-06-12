@@ -5,7 +5,7 @@ from pathlib import Path
 
 from nacm.config import load_profile
 from nacm.constants import FORBIDDEN_PATHS, SOURCE_EXTENSIONS
-from nacm.session.stats import collect_stats, render_stats
+from nacm.session.stats import append_stats_history, collect_stats, render_stats
 from nacm.utils.git import is_git_repo, run_git
 from nacm.utils.paths import agent_dir
 
@@ -58,6 +58,7 @@ def finalize(root: Path) -> Path:
     latest = reports / "latest_report.md"
     latest.write_text(report, encoding="utf-8")
     (sessions / "recent_changes.md").write_text(report, encoding="utf-8")
+    append_stats_history(root)
     return latest
 
 

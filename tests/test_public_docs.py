@@ -111,5 +111,6 @@ def test_readme_and_workflow_document_stats_command():
     assert "nacm stats" in readme
     assert "nacm stats" in workflow
     assert "nacm stats --json" in workflow
+    assert "nacm stats --history" in workflow
     assert "file reduction percentage" in workflow
     assert "selected file paths" in workflow
