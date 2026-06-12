@@ -1,26 +1,44 @@
-﻿[
+[
     {
         "project":  "humanize",
         "task":  "check naturaltime naturalday date and time formatting logic",
+        "repo_commit":  "976484a",
+        "nacm_version":  "0.1.0a4",
+        "max_files":  5,
         "indexed_files":  86,
         "context_files":  5,
         "context_chars":  4296,
-        "file_reduction_percent":  94.18604651162791
+        "file_reduction_percent":  94.18604651162791,
+        "index_seconds":  0.243,
+        "quick_seconds":  0.276,
+        "stats_seconds":  0.199
     },
     {
         "project":  "click",
         "task":  "check command option parsing and parameter validation logic",
+        "repo_commit":  "8a1b1a3",
+        "nacm_version":  "0.1.0a4",
+        "max_files":  5,
         "indexed_files":  150,
         "context_files":  5,
         "context_chars":  3652,
-        "file_reduction_percent":  96.66666666666667
+        "file_reduction_percent":  96.66666666666667,
+        "index_seconds":  0.302,
+        "quick_seconds":  0.242,
+        "stats_seconds":  0.173
     },
     {
         "project":  "uuid",
         "task":  "check v4 random uuid generation logic and tests",
+        "repo_commit":  "664cb31",
+        "nacm_version":  "0.1.0a4",
+        "max_files":  5,
         "indexed_files":  134,
         "context_files":  5,
         "context_chars":  2766,
-        "file_reduction_percent":  96.26865671641791
+        "file_reduction_percent":  96.26865671641791,
+        "index_seconds":  0.223,
+        "quick_seconds":  0.225,
+        "stats_seconds":  0.167
     }
 ]

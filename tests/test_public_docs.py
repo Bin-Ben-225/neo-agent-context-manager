@@ -25,8 +25,15 @@ def test_benchmark_script_and_docs_cover_efficiency_metrics():
         assert project in doc
         assert project in script
     assert "nacm stats --json" in script
+    assert "[string]$Project" in script
+    assert "[int]$MaxFiles" in script
+    assert "repo_commit" in script
+    assert "nacm_version" in script
+    assert "index_seconds" in script
     assert "File reduction" in doc
     assert "context files" in doc
+    assert "Repo commit" in doc
+    assert "Index seconds" in doc
 
 
 def test_contributing_doc_lists_required_development_checks():
