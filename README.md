@@ -119,5 +119,6 @@ nacm plan "refactor matcher and add tests"
 - [Hook Compatibility Notes](docs/hook-compatibility.md)
 - [Validation](docs/validation.md)
 - [Real Project Validation](docs/real-project-validation.md)
+- [Benchmark Results](docs/benchmark-results.md)
 - [Release Checklist](docs/release-checklist.md)
 - [Roadmap](docs/roadmap.md)

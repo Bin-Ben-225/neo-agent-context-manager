@@ -62,3 +62,21 @@ def test_stats_cli_prints_efficiency_metrics(tmp_path: Path, monkeypatch):
 
     assert result.exit_code == 0
     assert "File reduction:" in result.stdout
+
+
+def test_stats_cli_can_print_json(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+    init_workspace(tmp_path)
+    build_index(tmp_path)
+    save_task(tmp_path, "inspect app")
+    build_context_pack(tmp_path, max_files=1)
+
+    result = runner.invoke(app, ["stats", "--json"])
+
+    assert result.exit_code == 0
+    payload = __import__("json").loads(result.stdout)
+    assert payload["indexed_files"] == 1
+    assert payload["context_files"] == 1
+    assert "file_reduction_percent" in payload

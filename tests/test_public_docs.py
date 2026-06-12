@@ -17,6 +17,18 @@ def test_real_project_validation_docs_and_script_are_public_safe():
     assert ("Pha" + "se") not in doc
 
 
+def test_benchmark_script_and_docs_cover_efficiency_metrics():
+    doc = (ROOT / "docs" / "benchmark-results.md").read_text(encoding="utf-8")
+    script = (ROOT / "scripts" / "benchmark-projects.ps1").read_text(encoding="utf-8")
+
+    for project in ("humanize", "click", "uuid"):
+        assert project in doc
+        assert project in script
+    assert "nacm stats --json" in script
+    assert "File reduction" in doc
+    assert "context files" in doc
+
+
 def test_contributing_doc_lists_required_development_checks():
     doc = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
 

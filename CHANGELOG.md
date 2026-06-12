@@ -14,6 +14,7 @@ Fourth alpha release candidate.
 - Hook compatibility hardening with platform-specific commands, longer hook timeout, legacy uninstall cleanup, and observed payload notes.
 - Hook validation script and release checklist coverage for Codex-shaped and Claude Code-shaped payloads.
 - Efficiency stats command and context/report summaries showing indexed files, selected context files, and file reduction percentage.
+- Benchmark script and public benchmark results document for tracking file reduction on real projects.
 - Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
 
 ## 0.1.0a3

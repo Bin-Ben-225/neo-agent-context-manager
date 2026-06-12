@@ -14,7 +14,7 @@ from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
 from nacm.session.planner import create_batch_plan
-from nacm.session.stats import collect_stats, render_stats
+from nacm.session.stats import collect_stats, render_stats, stats_to_dict
 from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import latest_task, list_tasks, save_task
 from nacm.validation import run_smoke_validation
@@ -181,10 +181,14 @@ def status_command() -> None:
 
 
 @app.command("stats")
-def stats_command() -> None:
+def stats_command(json_output: bool = typer.Option(False, "--json")) -> None:
     require_initialized(Path.cwd())
     require_index(Path.cwd())
-    console.print(render_stats(collect_stats(Path.cwd())))
+    stats = collect_stats(Path.cwd())
+    if json_output:
+        typer.echo(json.dumps(stats_to_dict(stats), ensure_ascii=False))
+    else:
+        console.print(render_stats(stats))
 
 
 @app.command("doctor")

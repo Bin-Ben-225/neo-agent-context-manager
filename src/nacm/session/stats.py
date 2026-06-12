@@ -48,8 +48,25 @@ def render_stats(stats: EfficiencyStats) -> str:
     )
 
 
+def stats_to_dict(stats: EfficiencyStats) -> dict[str, int | float]:
+    return {
+        "indexed_files": stats.indexed_files,
+        "skipped_files": stats.skipped_files,
+        "context_files": stats.context_files,
+        "context_chars": stats.context_chars,
+        "file_reduction_percent": stats.file_reduction_percent,
+    }
+
+
 def count_context_files(context_text: str) -> int:
-    return sum(1 for line in context_text.splitlines() if line.startswith("### `"))
+    paths: set[str] = set()
+    for line in context_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- `") and "` (score:" in stripped:
+            paths.add(stripped.split("`", 2)[1])
+        elif stripped.startswith("### `") and stripped.endswith("`"):
+            paths.add(stripped.removeprefix("### `").removesuffix("`"))
+    return len(paths)
 
 
 def file_reduction(indexed_files: int, context_files: int) -> float:
