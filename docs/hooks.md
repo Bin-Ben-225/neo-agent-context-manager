@@ -17,6 +17,7 @@ Run these commands inside the project where you want NACM enabled:
 ```bash
 nacm hook install --target codex
 nacm hook install --target claude-code
+nacm hook install --target all
 nacm hook status
 ```
 
@@ -46,11 +47,15 @@ When the agent sends a `UserPromptSubmit` hook event, NACM:
 ```bash
 nacm hook install --target codex
 nacm hook install --target claude-code
+nacm hook install --target all
 nacm hook status
 nacm hook status --verbose
 nacm hook doctor
+nacm hook doctor --target codex
+nacm hook doctor --target claude-code
 nacm hook uninstall --target codex
 nacm hook uninstall --target claude-code
+nacm hook uninstall --target all
 ```
 
 Advanced manual run:
@@ -62,5 +67,6 @@ echo '{"cwd":"/path/to/project","prompt":"fix image loading"}' | nacm hook run -
 `hook run` prints JSON only, which keeps it suitable for agent hook execution.
 
 Use `nacm hook doctor` when checking a project before relying on automatic prompt submission. It reports each supported target and exits non-zero when any target is not installed.
+Use `--target all` to install or uninstall both supported local hook targets.
 
 See [Hook Compatibility Notes](hook-compatibility.md) for observed payload shapes and validation notes.

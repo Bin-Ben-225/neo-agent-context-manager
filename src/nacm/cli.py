@@ -8,7 +8,14 @@ import typer
 from rich.console import Console
 
 from nacm.adapters.registry import copy_prompt, write_prompt
-from nacm.hooks import hook_details, hook_status, install_hook, process_user_prompt_hook, uninstall_hook
+from nacm.hooks import (
+    hook_details,
+    hook_status,
+    hook_targets_for,
+    install_hook,
+    process_user_prompt_hook,
+    uninstall_hook,
+)
 from nacm.indexer.matcher import match_files
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
@@ -255,10 +262,17 @@ def hook_install_command(
     if scope != "project":
         fail("Only project scope is supported for hooks.")
     try:
-        path = install_hook(Path.cwd(), target=target)
+        targets = hook_targets_for(target)
     except ValueError as exc:
         fail(str(exc))
-    console.print(f"Installed {target} hook: {path}")
+    for hook_target in targets:
+        try:
+            path = install_hook(Path.cwd(), target=hook_target)
+        except ValueError as exc:
+            fail(str(exc))
+        console.print(f"Installed {hook_target} hook: {path}")
+    console.print("Verify: nacm hook doctor")
+    console.print("Inspect: nacm hook status --verbose")
 
 
 @hook_app.command("status")
@@ -280,8 +294,16 @@ def hook_status_command(verbose: bool = typer.Option(False, "--verbose")) -> Non
 
 
 @hook_app.command("doctor")
-def hook_doctor_command() -> None:
-    details = hook_details(Path.cwd())
+def hook_doctor_command(target: str = typer.Option("all", "--target")) -> None:
+    try:
+        targets = hook_targets_for(target)
+    except ValueError as exc:
+        fail(str(exc))
+    details = {
+        hook_target: detail
+        for hook_target, detail in hook_details(Path.cwd()).items()
+        if hook_target in targets
+    }
     all_ready = True
     for target, detail in details.items():
         if detail["installed"]:
@@ -299,10 +321,15 @@ def hook_doctor_command() -> None:
 @hook_app.command("uninstall")
 def hook_uninstall_command(target: str = typer.Option("codex", "--target")) -> None:
     try:
-        path = uninstall_hook(Path.cwd(), target=target)
+        targets = hook_targets_for(target)
     except ValueError as exc:
         fail(str(exc))
-    console.print(f"Uninstalled {target} hook entries from: {path}")
+    for hook_target in targets:
+        try:
+            path = uninstall_hook(Path.cwd(), target=hook_target)
+        except ValueError as exc:
+            fail(str(exc))
+        console.print(f"Uninstalled {hook_target} hook entries from: {path}")
 
 
 def main() -> None:

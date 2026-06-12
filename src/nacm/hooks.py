@@ -188,6 +188,13 @@ def supported_targets() -> str:
     return ", ".join(sorted(PROMPT_TARGETS))
 
 
+def hook_targets_for(target: str) -> list[str]:
+    if target == "all":
+        return sorted(PROMPT_TARGETS)
+    prompt_target_for(target)
+    return [target]
+
+
 def read_json_object(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}

@@ -122,6 +122,40 @@ def test_hook_doctor_cli_reports_ready_and_missing_targets(tmp_path: Path, monke
     assert "codex: not installed" in result.stdout
 
 
+def test_hook_install_and_uninstall_all_targets(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    install_result = runner.invoke(app, ["hook", "install", "--target", "all"])
+    status_after_install = hook_status(tmp_path)
+    uninstall_result = runner.invoke(app, ["hook", "uninstall", "--target", "all"])
+    status_after_uninstall = hook_status(tmp_path)
+
+    assert install_result.exit_code == 0
+    assert "Installed codex hook" in install_result.stdout
+    assert "Installed claude-code hook" in install_result.stdout
+    assert "Verify: nacm hook doctor" in install_result.stdout
+    assert status_after_install == {"claude-code": True, "codex": True}
+    assert uninstall_result.exit_code == 0
+    assert "Uninstalled codex hook" in uninstall_result.stdout
+    assert "Uninstalled claude-code hook" in uninstall_result.stdout
+    assert status_after_uninstall == {"claude-code": False, "codex": False}
+
+
+def test_hook_doctor_can_check_single_target(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    install_hook(tmp_path, target="codex")
+
+    codex_result = runner.invoke(app, ["hook", "doctor", "--target", "codex"])
+    claude_result = runner.invoke(app, ["hook", "doctor", "--target", "claude-code"])
+
+    assert codex_result.exit_code == 0
+    assert "codex: ready" in codex_result.stdout
+    assert "claude-code:" not in codex_result.stdout
+    assert claude_result.exit_code == 1
+    assert "claude-code: not installed" in claude_result.stdout
+    assert "codex:" not in claude_result.stdout
+
+
 def test_install_codex_hook_writes_windows_command_and_longer_timeout(tmp_path: Path):
     install_hook(tmp_path, target="codex")
 

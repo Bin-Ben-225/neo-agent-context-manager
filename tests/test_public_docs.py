@@ -94,8 +94,11 @@ def test_hooks_doc_describes_local_project_hook_workflow():
 
     assert "nacm hook install --target codex" in doc
     assert "nacm hook install --target claude-code" in doc
+    assert "nacm hook install --target all" in doc
     assert "nacm hook doctor" in doc
+    assert "nacm hook doctor --target codex" in doc
     assert "nacm hook status --verbose" in doc
+    assert "nacm hook uninstall --target all" in doc
     assert "UserPromptSubmit" in doc
     assert "does not upload source code" in doc
     assert "Claude Code `2.1.174`" in compatibility
