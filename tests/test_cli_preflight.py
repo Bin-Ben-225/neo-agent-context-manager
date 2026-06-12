@@ -17,6 +17,13 @@ def test_index_build_requires_init(tmp_path: Path, monkeypatch):
     assert "Run `nacm init` first." in result.stdout
 
 
+def test_cli_version_runs():
+    result = runner.invoke(app, ["--version"])
+
+    assert result.exit_code == 0
+    assert "0.1.0a5" in result.stdout
+
+
 def test_quick_requires_index(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     runner.invoke(app, ["init"])

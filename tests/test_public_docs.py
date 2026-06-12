@@ -71,6 +71,8 @@ def test_release_checklist_documents_tagging_and_verification():
     assert "py -3.11 -m ruff check ." in doc
     assert "py -3.11 -m nacm validate smoke" in doc
     assert ".\\scripts\\validate-hooks.ps1" in doc
+    assert ".\\scripts\\build-release.ps1" in doc
+    assert ".\\scripts\\validate-install.ps1" in doc
     assert "py -3.11 -m pip wheel . -w $env:TEMP\\nacm-wheel-check" in doc
     assert "git tag v0.1.0-alpha.X" in doc
     assert "Release Checklist" in readme
@@ -117,3 +119,12 @@ def test_readme_and_workflow_document_stats_command():
     assert "nacm stats --history" in workflow
     assert "file reduction percentage" in workflow
     assert "selected file paths" in workflow
+
+
+def test_readme_documents_user_install_options():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "pipx install neo-agent-context-manager" in readme
+    assert "uv tool install neo-agent-context-manager" in readme
+    assert "pipx install .\\neo_agent_context_manager-" in readme
+    assert "nacm --version" in readme
