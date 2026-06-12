@@ -22,6 +22,8 @@ py -3.11 -m pytest tests -q
 py -3.11 -m ruff check .
 py -3.11 -m nacm validate smoke
 .\scripts\validate-hooks.ps1
+.\scripts\build-release.ps1
+.\scripts\validate-install.ps1
 py -3.11 -m pip wheel . -w $env:TEMP\nacm-wheel-check
 ```
 

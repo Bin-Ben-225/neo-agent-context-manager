@@ -24,6 +24,42 @@ The current version focuses on:
 
 This version does not implement MCP, plugins, embeddings, vector databases, GUI/TUI, background services, cloud sync, code upload, or automatic Git commits.
 
+## Install
+
+Recommended for CLI use:
+
+```bash
+pipx install neo-agent-context-manager
+nacm --version
+```
+
+Fast alternative:
+
+```bash
+uv tool install neo-agent-context-manager
+nacm --version
+```
+
+Fallback with pip:
+
+```bash
+python -m pip install neo-agent-context-manager
+nacm --version
+```
+
+From a GitHub Release wheel on Windows:
+
+```powershell
+pipx install .\neo_agent_context_manager-0.1.0a5-py3-none-any.whl
+nacm --version
+```
+
+If `nacm` is not on `PATH`, use the Python module form:
+
+```powershell
+py -3.11 -m nacm --help
+```
+
 ## Install For Development
 
 ```bash

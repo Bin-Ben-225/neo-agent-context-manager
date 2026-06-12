@@ -15,6 +15,7 @@ Fifth alpha release candidate.
 - Stats history snapshots written by `nacm done` with `nacm stats --history` summary output.
 - Hook install/uninstall all-target support, target-scoped hook doctor, and post-install verification hints.
 - Version output via `nacm --version`.
+- Release build and install validation scripts for wheel/sdist, pipx, uv tool, and venv console-script checks.
 
 ## 0.1.0a4
 
