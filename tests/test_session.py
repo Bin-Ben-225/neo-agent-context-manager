@@ -97,6 +97,28 @@ def test_pack_respects_max_files_and_can_include_explanations(tmp_path: Path, mo
     assert "Included file budget: 1" in context_pack
 
 
+def test_context_pack_includes_efficiency_summary(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    for index in range(4):
+        (tmp_path / "src" / f"module_{index}.py").write_text(
+            f"def target_{index}():\n    return {index}\n",
+            encoding="utf-8",
+        )
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+    runner.invoke(app, ["task", "set", "target one"])
+
+    result = runner.invoke(app, ["pack", "--max-files", "1"])
+
+    assert result.exit_code == 0
+    context_pack = (tmp_path / ".agent" / "sessions" / "context_pack.md").read_text(encoding="utf-8")
+    assert "## Efficiency Summary" in context_pack
+    assert "Indexed files: 4" in context_pack
+    assert "Context files:" in context_pack
+    assert "File reduction:" in context_pack
+
+
 def test_pack_can_write_claude_prompt_target(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     (tmp_path / "src").mkdir()

@@ -14,6 +14,7 @@ from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
 from nacm.session.packer import build_context_pack
 from nacm.session.planner import create_batch_plan
+from nacm.session.stats import collect_stats, render_stats
 from nacm.session.status import inspect_workspace, render_status
 from nacm.session.task import latest_task, list_tasks, save_task
 from nacm.validation import run_smoke_validation
@@ -177,6 +178,13 @@ def done_command() -> None:
 @app.command("status")
 def status_command() -> None:
     console.print(render_status(inspect_workspace(Path.cwd())))
+
+
+@app.command("stats")
+def stats_command() -> None:
+    require_initialized(Path.cwd())
+    require_index(Path.cwd())
+    console.print(render_stats(collect_stats(Path.cwd())))
 
 
 @app.command("doctor")

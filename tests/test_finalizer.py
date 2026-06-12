@@ -49,6 +49,26 @@ def test_done_report_classifies_changed_files_and_marks_index_dirty(tmp_path: Pa
     assert "src/new_feature.py" in index_state["changed_files"]
 
 
+def test_done_report_includes_efficiency_summary_when_context_pack_exists(
+    tmp_path: Path, monkeypatch
+):
+    monkeypatch.chdir(tmp_path)
+    init_git_repo(tmp_path)
+    commit_file(tmp_path, "src/app.py", "def run():\n    return True\n")
+    runner.invoke(app, ["init"])
+    runner.invoke(app, ["index", "build"])
+    runner.invoke(app, ["quick", "inspect app", "--max-files", "1"])
+
+    result = runner.invoke(app, ["done"])
+
+    assert result.exit_code == 0
+    report = (tmp_path / ".agent" / "reports" / "latest_report.md").read_text(encoding="utf-8")
+    assert "## Efficiency Summary" in report
+    assert "Indexed files:" in report
+    assert "Context files:" in report
+    assert "File reduction:" in report
+
+
 def test_done_report_recommends_large_change_review_when_change_count_exceeds_profile(
     tmp_path: Path, monkeypatch
 ):

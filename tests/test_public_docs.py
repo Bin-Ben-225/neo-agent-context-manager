@@ -51,9 +51,21 @@ def test_release_checklist_documents_tagging_and_verification():
     assert "py -3.11 -m pytest tests -q" in doc
     assert "py -3.11 -m ruff check ." in doc
     assert "py -3.11 -m nacm validate smoke" in doc
+    assert ".\\scripts\\validate-hooks.ps1" in doc
     assert "py -3.11 -m pip wheel . -w $env:TEMP\\nacm-wheel-check" in doc
     assert "git tag v0.1.0-alpha.X" in doc
     assert "Release Checklist" in readme
+
+
+def test_hook_validation_script_covers_codex_and_claude_payloads():
+    script = (ROOT / "scripts" / "validate-hooks.ps1").read_text(encoding="utf-8")
+
+    assert "nacm hook install --target $Target" in script
+    assert '-Target "codex"' in script
+    assert '-Target "claude-code"' in script
+    assert "gpt-5-codex" in script
+    assert "permission_mode" in script
+    assert "context_pack.md" in script
 
 
 def test_hooks_doc_describes_local_project_hook_workflow():
@@ -69,3 +81,12 @@ def test_hooks_doc_describes_local_project_hook_workflow():
     assert "Access is denied" in compatibility
     assert "commandWindows" in compatibility
     assert "Hooks" in readme
+
+
+def test_readme_and_workflow_document_stats_command():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    workflow = (ROOT / "docs" / "workflow.md").read_text(encoding="utf-8")
+
+    assert "nacm stats" in readme
+    assert "nacm stats" in workflow
+    assert "file reduction percentage" in workflow

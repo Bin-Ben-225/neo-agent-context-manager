@@ -5,6 +5,7 @@ from pathlib import Path
 
 from nacm.config import load_profile
 from nacm.constants import FORBIDDEN_PATHS, SOURCE_EXTENSIONS
+from nacm.session.stats import collect_stats, render_stats
 from nacm.utils.git import is_git_repo, run_git
 from nacm.utils.paths import agent_dir
 
@@ -52,6 +53,7 @@ def finalize(root: Path) -> Path:
         large_change=large_change,
         git_available=git_available,
         index_dirty=index_dirty,
+        efficiency_summary=render_stats(collect_stats(root)),
     )
     latest = reports / "latest_report.md"
     latest.write_text(report, encoding="utf-8")
@@ -68,6 +70,7 @@ def render_report(
     large_change: bool,
     git_available: bool,
     index_dirty: bool,
+    efficiency_summary: str = "",
 ) -> str:
     lines = [
         "# NACM Task Report",
@@ -77,6 +80,10 @@ def render_report(
         f"Changed file count: {len(changed_paths)}",
         f"Large Change Risk: {'yes' if large_change else 'no'}",
         f"Index Dirty: {'yes' if index_dirty else 'no'}",
+        "",
+        "## Efficiency Summary",
+        "",
+        efficiency_summary.strip() or "No context pack stats available.",
         "",
         "## Git Status",
         "",

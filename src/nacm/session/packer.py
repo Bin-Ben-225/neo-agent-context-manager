@@ -5,6 +5,7 @@ from pathlib import Path
 from nacm.constants import FORBIDDEN_PATHS
 from nacm.config import load_profile
 from nacm.indexer.matcher import match_files
+from nacm.session.stats import file_reduction
 from nacm.session.task import read_current_task
 from nacm.templates.renderer import render_template
 from nacm.utils.paths import agent_dir
@@ -22,6 +23,8 @@ def build_context_pack(
         raise ValueError("No current task. Run `nacm task \"...\"` first.")
     profile = load_profile(root, profile_name)
     matched = match_files(root, task, limit=max_files or profile.max_files_in_context)
+    indexed_files = read_indexed_file_count(root)
+    context_files = len(matched)
     local_agent = agent_dir(root)
     sessions = local_agent / "sessions"
     codex_dir = local_agent / "codex"
@@ -34,6 +37,8 @@ def build_context_pack(
         max_chars=profile.max_context_chars,
         max_files=max_files or profile.max_files_in_context,
         include_explanations=include_explanations,
+        indexed_files=indexed_files,
+        context_files=context_files,
     )
     (sessions / "context_pack.md").write_text(context, encoding="utf-8")
     return {"context_pack": sessions / "context_pack.md"}
@@ -45,8 +50,11 @@ def render_context_pack(
     max_chars: int = 30000,
     max_files: int = 8,
     include_explanations: bool = False,
+    indexed_files: int = 0,
+    context_files: int | None = None,
 ) -> str:
     prepared = prepare_matched_files(matched)
+    actual_context_files = len(prepared) if context_files is None else context_files
     content = render_template(
         "context_pack.md.j2",
         {
@@ -56,9 +64,28 @@ def render_context_pack(
             "forbidden_paths": FORBIDDEN_PATHS,
             "max_files": max_files,
             "include_explanations": include_explanations,
+            "efficiency": {
+                "indexed_files": indexed_files,
+                "context_files": actual_context_files,
+                "file_reduction_percent": file_reduction(indexed_files, actual_context_files),
+            },
         },
     )
     return content[:max_chars]
+
+
+def read_indexed_file_count(root: Path) -> int:
+    index_path = agent_dir(root) / "index" / "file_summary.json"
+    if not index_path.exists():
+        return 0
+    import json
+
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return 0
+    files = data.get("files") if isinstance(data, dict) else None
+    return len(files) if isinstance(files, list) else 0
 
 
 def prepare_matched_files(matched: list[dict]) -> list[dict]:

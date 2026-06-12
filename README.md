@@ -91,6 +91,12 @@ Inspect why NACM selected files for a task:
 nacm match explain "fix image loading path issue"
 ```
 
+Show how much the latest context pack reduced the file set:
+
+```bash
+nacm stats
+```
+
 Generate a prompt-only Claude-style prompt:
 
 ```bash
