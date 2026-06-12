@@ -1,0 +1,26 @@
+﻿[
+    {
+        "project":  "humanize",
+        "task":  "check naturaltime naturalday date and time formatting logic",
+        "indexed_files":  86,
+        "context_files":  5,
+        "context_chars":  4296,
+        "file_reduction_percent":  94.18604651162791
+    },
+    {
+        "project":  "click",
+        "task":  "check command option parsing and parameter validation logic",
+        "indexed_files":  150,
+        "context_files":  5,
+        "context_chars":  3652,
+        "file_reduction_percent":  96.66666666666667
+    },
+    {
+        "project":  "uuid",
+        "task":  "check v4 random uuid generation logic and tests",
+        "indexed_files":  134,
+        "context_files":  5,
+        "context_chars":  2766,
+        "file_reduction_percent":  96.26865671641791
+    }
+]
