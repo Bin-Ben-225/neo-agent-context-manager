@@ -8,6 +8,7 @@ All notable changes to NACM will be documented in this file.
 
 - Distribution guide covering GitHub Release artifacts, PyPI, Homebrew, WinGet, pipx, and uv install paths.
 - Release manifest script for recording artifact size and SHA256 checksums.
+- Publish validation script for checking wheel/source distribution metadata before upload.
 
 ## 0.1.0a5
 

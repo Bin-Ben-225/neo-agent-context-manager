@@ -45,6 +45,15 @@ Generate the manifest after building the wheel and source distribution:
 The manifest records artifact name, type, size, and SHA256 checksum. It is safe
 to publish with the release and gives users a stable way to verify downloads.
 
+Run the publish validation script before uploading or publishing:
+
+```powershell
+.\scripts\validate-publish.ps1
+```
+
+This checks that both wheel and source distribution exist, refreshes
+`release-manifest.json`, and runs `twine check` against the Python artifacts.
+
 ## PyPI
 
 PyPI is the primary channel for `pipx` and `uv tool install` by package name.

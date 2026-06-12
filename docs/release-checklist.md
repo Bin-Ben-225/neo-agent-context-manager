@@ -25,6 +25,7 @@ py -3.11 -m nacm validate smoke
 .\scripts\build-release.ps1
 .\scripts\validate-install.ps1
 .\scripts\write-release-manifest.ps1
+.\scripts\validate-publish.ps1
 py -3.11 -m pip wheel . -w $env:TEMP\nacm-wheel-check
 ```
 

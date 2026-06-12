@@ -14,13 +14,33 @@ if (!$wheel) {
 
 Write-Output "Validating wheel: $($wheel.FullName)"
 
+function Get-NacmCommand {
+  $command = Get-Command nacm -ErrorAction SilentlyContinue
+  if ($command) {
+    return $command.Source
+  }
+
+  $pipxLocal = Join-Path $env:USERPROFILE ".local\bin\nacm.exe"
+  if (Test-Path $pipxLocal) {
+    return $pipxLocal
+  }
+
+  $pythonScripts = Join-Path $env:APPDATA "Python\Python311\Scripts\nacm.exe"
+  if (Test-Path $pythonScripts) {
+    return $pythonScripts
+  }
+
+  throw "nacm command was installed but could not be found. Check PATH or pipx app path."
+}
+
 $pipx = Get-Command pipx -ErrorAction SilentlyContinue
-if ($pipx) {
-  pipx uninstall neo-agent-context-manager --yes 2>$null | Out-Null
-  pipx install $wheel.FullName
-  nacm --version
-  nacm --help | Out-Null
-  pipx uninstall neo-agent-context-manager --yes | Out-Null
+if ($pipx -or (py -3.11 -m pipx --version 2>$null)) {
+  py -3.11 -m pipx uninstall neo-agent-context-manager 2>$null | Out-Null
+  py -3.11 -m pipx install $wheel.FullName
+  $nacm = Get-NacmCommand
+  & $nacm --version
+  & $nacm --help | Out-Null
+  py -3.11 -m pipx uninstall neo-agent-context-manager | Out-Null
   Write-Output "pipx install validation passed."
 } else {
   Write-Output "pipx not found; skipping pipx validation."
