@@ -13,7 +13,7 @@ nacm quick "fix image loading path issue"
 nacm done
 ```
 
-Claude Code hooks, MCP, plugins, semantic indexing, embeddings, GUI/TUI, and background watchers are outside the current scope.
+MCP, plugins, semantic indexing, embeddings, GUI/TUI, and background watchers are outside the current scope.
 
 ## Local Workspace
 
@@ -78,7 +78,7 @@ The generated Codex prompt tells Codex to read `.agent/sessions/context_pack.md`
 Supported prompt targets are:
 
 - `codex`: writes `.agent/codex/codex_prompt.md` and supports clipboard copy.
-- `claude-prompt`: writes `.agent/claude/claude_prompt.md` for prompt-only Claude-style use. It does not install hooks, use MCP, run plugins, or start background services.
+- `claude-prompt`: writes `.agent/claude/claude_prompt.md` for prompt-only Claude-style use. Project-local hooks can call this target, but NACM does not use MCP, run plugins, or start background services.
 
 Prompt templates receive lightweight metadata when available: the current task, confidence file counts, and whether a workstation relation index exists.
 

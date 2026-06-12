@@ -28,7 +28,7 @@ For a prompt-only Claude-style workflow:
 nacm quick "fix image loading path issue" --target claude-prompt
 ```
 
-This writes `.agent/claude/claude_prompt.md`. NACM does not install hooks, run Claude Code, or start background services.
+This writes `.agent/claude/claude_prompt.md`. To prepare this prompt automatically when a task is submitted, install the project-local Claude Code hook. NACM does not run Claude Code or start background services.
 
 To inspect local NACM state at any time:
 

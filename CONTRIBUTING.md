@@ -26,7 +26,7 @@ py -3.11 -m pip wheel . -w $env:TEMP\nacm-wheel-check
 - Do not commit `.agent/`.
 - Do not modify a user's `.gitignore` by default.
 - Do not create or modify a user's repository root `AGENTS.md` during `nacm init`.
-- Do not implement hooks, MCP, plugins, background services, embeddings, vector databases, or GUI/TUI unless that scope has a separate design review.
+- Do not implement MCP, plugins, background services, embeddings, vector databases, or GUI/TUI unless that scope has a separate design review.
 
 ## Testing Expectations
 

@@ -18,10 +18,11 @@ The current version focuses on:
 - Prompt target adapters for `codex` and `claude-prompt`
 - Codex prompt generation
 - Clipboard copy for Codex prompts
+- Project-local UserPromptSubmit hooks for Codex and Claude Code
 - Task finalization report with changed-file summaries, forbidden path checks, and large-change risk hints
 - Built-in smoke validation command
 
-This version does not implement Claude Code hooks, MCP, plugins, embeddings, vector databases, GUI/TUI, background services, or automatic Git commits.
+This version does not implement MCP, plugins, embeddings, vector databases, GUI/TUI, background services, cloud sync, code upload, or automatic Git commits.
 
 ## Install For Development
 
@@ -59,6 +60,16 @@ nacm quick "fix image loading path issue"
 ```
 
 `quick` writes `.agent/sessions/context_pack.md`, renders `.agent/codex/codex_prompt.md`, and tries to copy the prompt to your clipboard. Paste the generated prompt into Codex.
+
+To let a supported agent trigger NACM when you send a task, install a project-local hook:
+
+```bash
+nacm hook install --target codex
+nacm hook install --target claude-code
+nacm hook status
+```
+
+The hook reads the submitted prompt, prepares `.agent/sessions/context_pack.md`, and returns a short instruction for the agent to read that local file first. Hook config files are written under `.codex/` or `.claude/` and are added to `.git/info/exclude` when the project is a Git repository.
 
 After Codex finishes:
 
@@ -98,6 +109,7 @@ nacm plan "refactor matcher and add tests"
 - [Workflow](docs/workflow.md)
 - [Examples](docs/examples.md)
 - [Installation](docs/install.md)
+- [Hooks](docs/hooks.md)
 - [Validation](docs/validation.md)
 - [Real Project Validation](docs/real-project-validation.md)
 - [Release Checklist](docs/release-checklist.md)

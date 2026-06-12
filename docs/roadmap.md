@@ -23,7 +23,7 @@
 ## Planned Improvements
 
 - Optional Codex Skill or Plugin integration after separate design review
-- Optional Claude hooks after separate design review
+- Project-local prompt submission hook hardening and compatibility checks
 
 ## Out Of Scope For The Current Version
 

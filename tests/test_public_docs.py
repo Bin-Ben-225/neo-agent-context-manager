@@ -24,7 +24,7 @@ def test_contributing_doc_lists_required_development_checks():
     assert "py -3.11 -m ruff check ." in doc
     assert "py -3.11 -m nacm validate smoke" in doc
     assert "Do not commit `.agent/`" in doc
-    assert "Do not implement hooks, MCP, plugins, background services, embeddings, vector databases, or GUI/TUI" in doc
+    assert "Do not implement MCP, plugins, background services, embeddings, vector databases, or GUI/TUI" in doc
 
 
 def test_github_templates_cover_expected_feedback_paths():
@@ -54,3 +54,14 @@ def test_release_checklist_documents_tagging_and_verification():
     assert "py -3.11 -m pip wheel . -w $env:TEMP\\nacm-wheel-check" in doc
     assert "git tag v0.1.0-alpha.X" in doc
     assert "Release Checklist" in readme
+
+
+def test_hooks_doc_describes_local_project_hook_workflow():
+    doc = (ROOT / "docs" / "hooks.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "nacm hook install --target codex" in doc
+    assert "nacm hook install --target claude-code" in doc
+    assert "UserPromptSubmit" in doc
+    assert "does not upload source code" in doc
+    assert "Hooks" in readme

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sys
 
@@ -7,6 +8,7 @@ import typer
 from rich.console import Console
 
 from nacm.adapters.registry import copy_prompt, write_prompt
+from nacm.hooks import hook_status, install_hook, process_user_prompt_hook, uninstall_hook
 from nacm.indexer.matcher import match_files
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
@@ -22,10 +24,12 @@ index_app = typer.Typer(no_args_is_help=True)
 validate_app = typer.Typer(no_args_is_help=True)
 match_app = typer.Typer(no_args_is_help=True)
 task_app = typer.Typer(no_args_is_help=True)
+hook_app = typer.Typer(no_args_is_help=True)
 app.add_typer(index_app, name="index")
 app.add_typer(validate_app, name="validate")
 app.add_typer(match_app, name="match")
 app.add_typer(task_app, name="task")
+app.add_typer(hook_app, name="hook")
 console = Console()
 
 
@@ -201,6 +205,55 @@ def validate_smoke_command() -> None:
 @app.command("finalize")
 def finalize_command() -> None:
     done_command()
+
+
+@hook_app.command("run")
+def hook_run_command(target: str = typer.Option("codex", "--target")) -> None:
+    try:
+        payload = json.loads(sys.stdin.read() or "{}")
+        if not isinstance(payload, dict):
+            raise ValueError("Hook input must be a JSON object.")
+        output = process_user_prompt_hook(payload, target=target)
+    except Exception as exc:
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "UserPromptSubmit",
+                "additionalContext": f"NACM hook skipped: {exc}",
+            },
+            "systemMessage": "NACM hook skipped.",
+        }
+    typer.echo(json.dumps(output, ensure_ascii=False))
+
+
+@hook_app.command("install")
+def hook_install_command(
+    target: str = typer.Option("codex", "--target"),
+    scope: str = typer.Option("project", "--scope"),
+) -> None:
+    if scope != "project":
+        fail("Only project scope is supported for hooks.")
+    try:
+        path = install_hook(Path.cwd(), target=target)
+    except ValueError as exc:
+        fail(str(exc))
+    console.print(f"Installed {target} hook: {path}")
+
+
+@hook_app.command("status")
+def hook_status_command() -> None:
+    status = hook_status(Path.cwd())
+    for target, enabled in status.items():
+        state = "installed" if enabled else "not installed"
+        console.print(f"{target}: {state}")
+
+
+@hook_app.command("uninstall")
+def hook_uninstall_command(target: str = typer.Option("codex", "--target")) -> None:
+    try:
+        path = uninstall_hook(Path.cwd(), target=target)
+    except ValueError as exc:
+        fail(str(exc))
+    console.print(f"Uninstalled {target} hook entries from: {path}")
 
 
 def main() -> None:
