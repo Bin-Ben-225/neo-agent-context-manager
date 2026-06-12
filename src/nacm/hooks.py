@@ -102,6 +102,36 @@ def hook_status(root: Path) -> dict[str, bool]:
     }
 
 
+def hook_details(root: Path) -> dict[str, dict[str, Any]]:
+    details: dict[str, dict[str, Any]] = {}
+    for target in sorted(PROMPT_TARGETS):
+        path = hook_config_path(root, target)
+        config = read_json_object(path)
+        command_hooks = matching_command_hooks(config.get("hooks"), target)
+        details[target] = {
+            "installed": bool(command_hooks),
+            "config_path": path,
+            "command": command_hooks[0].get("command", "") if command_hooks else "",
+            "timeout": command_hooks[0].get("timeout") if command_hooks else None,
+            "prompt_target": prompt_target_for(target),
+        }
+    return details
+
+
+def matching_command_hooks(existing_hooks: Any, target: str) -> list[dict[str, Any]]:
+    hooks = existing_hooks if isinstance(existing_hooks, dict) else {}
+    event_entries = hooks.get(HOOK_EVENT) if isinstance(hooks.get(HOOK_EVENT), list) else []
+    commands = set(known_hook_commands_for(target))
+    matches: list[dict[str, Any]] = []
+    for item in event_entries:
+        if not isinstance(item, dict) or not isinstance(item.get("hooks"), list):
+            continue
+        for hook in item["hooks"]:
+            if isinstance(hook, dict) and hook.get("command") in commands:
+                matches.append(hook)
+    return matches
+
+
 def ensure_workspace_ready(root: Path) -> None:
     if not agent_dir(root).is_dir():
         init_workspace(root)

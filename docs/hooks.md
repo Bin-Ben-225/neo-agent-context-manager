@@ -47,6 +47,8 @@ When the agent sends a `UserPromptSubmit` hook event, NACM:
 nacm hook install --target codex
 nacm hook install --target claude-code
 nacm hook status
+nacm hook status --verbose
+nacm hook doctor
 nacm hook uninstall --target codex
 nacm hook uninstall --target claude-code
 ```
@@ -58,5 +60,7 @@ echo '{"cwd":"/path/to/project","prompt":"fix image loading"}' | nacm hook run -
 ```
 
 `hook run` prints JSON only, which keeps it suitable for agent hook execution.
+
+Use `nacm hook doctor` when checking a project before relying on automatic prompt submission. It reports each supported target and exits non-zero when any target is not installed.
 
 See [Hook Compatibility Notes](hook-compatibility.md) for observed payload shapes and validation notes.

@@ -8,7 +8,7 @@ import typer
 from rich.console import Console
 
 from nacm.adapters.registry import copy_prompt, write_prompt
-from nacm.hooks import hook_status, install_hook, process_user_prompt_hook, uninstall_hook
+from nacm.hooks import hook_details, hook_status, install_hook, process_user_prompt_hook, uninstall_hook
 from nacm.indexer.matcher import match_files
 from nacm.indexer.scanner import build_index
 from nacm.session.finalizer import finalize
@@ -252,11 +252,38 @@ def hook_install_command(
 
 
 @hook_app.command("status")
-def hook_status_command() -> None:
+def hook_status_command(verbose: bool = typer.Option(False, "--verbose")) -> None:
+    if verbose:
+        for target, detail in hook_details(Path.cwd()).items():
+            state = "installed" if detail["installed"] else "not installed"
+            console.print(f"{target}: {state}")
+            console.print(f"  config: {detail['config_path']}")
+            console.print(f"  prompt target: {detail['prompt_target']}")
+            if detail["installed"]:
+                console.print(f"  command: {detail['command']}")
+                console.print(f"  timeout: {detail['timeout']}")
+        return
     status = hook_status(Path.cwd())
     for target, enabled in status.items():
         state = "installed" if enabled else "not installed"
         console.print(f"{target}: {state}")
+
+
+@hook_app.command("doctor")
+def hook_doctor_command() -> None:
+    details = hook_details(Path.cwd())
+    all_ready = True
+    for target, detail in details.items():
+        if detail["installed"]:
+            console.print(f"{target}: ready")
+            console.print(f"  config: {detail['config_path']}")
+            console.print(f"  command: {detail['command']}")
+        else:
+            all_ready = False
+            console.print(f"{target}: not installed")
+            console.print(f"  install: nacm hook install --target {target}")
+    if not all_ready:
+        raise typer.Exit(code=1)
 
 
 @hook_app.command("uninstall")

@@ -99,6 +99,29 @@ def test_install_status_and_uninstall_project_hooks(tmp_path: Path):
     assert status["codex"] is False
 
 
+def test_hook_status_verbose_cli_shows_paths_and_timeout(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    install_hook(tmp_path, target="codex")
+
+    result = runner.invoke(app, ["hook", "status", "--verbose"])
+
+    assert result.exit_code == 0
+    assert ".codex" in result.stdout
+    assert "timeout: 120" in result.stdout
+    assert "command:" in result.stdout
+
+
+def test_hook_doctor_cli_reports_ready_and_missing_targets(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    install_hook(tmp_path, target="claude-code")
+
+    result = runner.invoke(app, ["hook", "doctor"])
+
+    assert result.exit_code == 1
+    assert "claude-code: ready" in result.stdout
+    assert "codex: not installed" in result.stdout
+
+
 def test_install_codex_hook_writes_windows_command_and_longer_timeout(tmp_path: Path):
     install_hook(tmp_path, target="codex")
 
