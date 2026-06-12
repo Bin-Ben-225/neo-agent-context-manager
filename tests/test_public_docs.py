@@ -25,3 +25,20 @@ def test_contributing_doc_lists_required_development_checks():
     assert "py -3.11 -m nacm validate smoke" in doc
     assert "Do not commit `.agent/`" in doc
     assert "Do not implement hooks, MCP, plugins, background services, embeddings, vector databases, or GUI/TUI" in doc
+
+
+def test_github_templates_cover_expected_feedback_paths():
+    bug = (ROOT / ".github" / "ISSUE_TEMPLATE" / "bug_report.md").read_text(encoding="utf-8")
+    matcher = (ROOT / ".github" / "ISSUE_TEMPLATE" / "matcher_quality_report.md").read_text(
+        encoding="utf-8"
+    )
+    target = (ROOT / ".github" / "ISSUE_TEMPLATE" / "target_prompt_request.md").read_text(
+        encoding="utf-8"
+    )
+    pr = (ROOT / ".github" / "pull_request_template.md").read_text(encoding="utf-8")
+
+    assert "NACM command" in bug
+    assert "Expected top files" in matcher
+    assert "Prompt target" in target
+    assert "py -3.11 -m pytest tests -q" in pr
+    assert "py -3.11 -m ruff check ." in pr
