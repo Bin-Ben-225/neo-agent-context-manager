@@ -58,10 +58,14 @@ def test_release_checklist_documents_tagging_and_verification():
 
 def test_hooks_doc_describes_local_project_hook_workflow():
     doc = (ROOT / "docs" / "hooks.md").read_text(encoding="utf-8")
+    compatibility = (ROOT / "docs" / "hook-compatibility.md").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "nacm hook install --target codex" in doc
     assert "nacm hook install --target claude-code" in doc
     assert "UserPromptSubmit" in doc
     assert "does not upload source code" in doc
+    assert "Claude Code `2.1.174`" in compatibility
+    assert "Access is denied" in compatibility
+    assert "commandWindows" in compatibility
     assert "Hooks" in readme

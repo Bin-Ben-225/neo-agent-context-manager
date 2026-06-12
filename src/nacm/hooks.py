@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +14,12 @@ from nacm.utils.paths import agent_dir
 from nacm.workspace import init_workspace
 
 HOOK_EVENT = "UserPromptSubmit"
-HOOK_COMMANDS = {
+DEFAULT_HOOK_TIMEOUT_SECONDS = 120
+POSIX_HOOK_COMMANDS = {
+    "claude-code": "python3 -m nacm hook run --target claude-code",
+    "codex": "python3 -m nacm hook run --target codex",
+}
+WINDOWS_HOOK_COMMANDS = {
     "claude-code": "py -3.11 -m nacm hook run --target claude-code",
     "codex": "py -3.11 -m nacm hook run --target codex",
 }
@@ -25,6 +31,10 @@ PROMPT_TARGETS = {
 
 def process_user_prompt_hook(payload: dict[str, Any], target: str = "codex") -> dict[str, Any]:
     prompt_target = prompt_target_for(target)
+    event_name = str(payload.get("hook_event_name") or HOOK_EVENT)
+    if event_name != HOOK_EVENT:
+        return hook_output(f"NACM hook skipped unsupported event `{event_name}`.")
+
     root = Path(str(payload.get("cwd") or Path.cwd())).expanduser()
     prompt = str(payload.get("prompt") or "").strip()
     if not prompt:
@@ -52,7 +62,12 @@ def install_hook(root: Path, target: str) -> Path:
     config_path = hook_config_path(root, target)
     config = read_json_object(config_path)
     command = hook_command_for(target)
-    entry: dict[str, Any] = {"type": "command", "command": command, "timeout": 30}
+    entry: dict[str, Any] = {
+        "type": "command",
+        "command": command,
+        "commandWindows": windows_hook_command_for(target),
+        "timeout": DEFAULT_HOOK_TIMEOUT_SECONDS,
+    }
     if target == "codex":
         entry["statusMessage"] = "Preparing NACM context"
 
@@ -65,7 +80,10 @@ def install_hook(root: Path, target: str) -> Path:
 def uninstall_hook(root: Path, target: str) -> Path:
     config_path = hook_config_path(root, target)
     config = read_json_object(config_path)
-    config["hooks"] = remove_command_hook(config.get("hooks"), hook_command_for(target))
+    hooks = config.get("hooks")
+    for command in known_hook_commands_for(target):
+        hooks = remove_command_hook(hooks, command)
+    config["hooks"] = hooks
     if not config["hooks"]:
         config.pop("hooks")
     write_json_object(config_path, config)
@@ -74,8 +92,9 @@ def uninstall_hook(root: Path, target: str) -> Path:
 
 def hook_status(root: Path) -> dict[str, bool]:
     return {
-        target: hook_command_for(target) in hook_config_path(root, target).read_text(
-            encoding="utf-8"
+        target: any(
+            command in hook_config_path(root, target).read_text(encoding="utf-8")
+            for command in known_hook_commands_for(target)
         )
         if hook_config_path(root, target).exists()
         else False
@@ -115,9 +134,24 @@ def prompt_target_for(target: str) -> str:
 
 
 def hook_command_for(target: str) -> str:
-    if target not in HOOK_COMMANDS:
+    if os.name == "nt":
+        return windows_hook_command_for(target)
+    if target not in POSIX_HOOK_COMMANDS:
         raise ValueError(f"Unsupported hook target `{target}`. Supported targets: {supported_targets()}.")
-    return HOOK_COMMANDS[target]
+    return POSIX_HOOK_COMMANDS[target]
+
+
+def windows_hook_command_for(target: str) -> str:
+    if target not in WINDOWS_HOOK_COMMANDS:
+        raise ValueError(f"Unsupported hook target `{target}`. Supported targets: {supported_targets()}.")
+    return WINDOWS_HOOK_COMMANDS[target]
+
+
+def known_hook_commands_for(target: str) -> list[str]:
+    commands = [hook_command_for(target), windows_hook_command_for(target)]
+    if target in POSIX_HOOK_COMMANDS:
+        commands.append(POSIX_HOOK_COMMANDS[target])
+    return list(dict.fromkeys(commands))
 
 
 def supported_targets() -> str:

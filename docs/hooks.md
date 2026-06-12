@@ -27,6 +27,8 @@ Project-local config files are written to:
 
 When the project is a Git repository, NACM adds these local files and `.agent/` to `.git/info/exclude`.
 
+Installed hooks use a 120 second timeout and platform-specific commands. On Windows, NACM writes a `commandWindows` field for Codex and uses `py -3.11 -m nacm` for local execution.
+
 ## Runtime Behavior
 
 When the agent sends a `UserPromptSubmit` hook event, NACM:
@@ -56,3 +58,5 @@ echo '{"cwd":"/path/to/project","prompt":"fix image loading"}' | nacm hook run -
 ```
 
 `hook run` prints JSON only, which keeps it suitable for agent hook execution.
+
+See [Hook Compatibility Notes](hook-compatibility.md) for observed payload shapes and validation notes.

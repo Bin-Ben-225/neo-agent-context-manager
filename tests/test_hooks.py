@@ -7,8 +7,10 @@ from nacm.cli import app
 from nacm.hooks import (
     hook_status,
     install_hook,
+    hook_command_for,
     process_user_prompt_hook,
     uninstall_hook,
+    windows_hook_command_for,
 )
 
 
@@ -34,6 +36,27 @@ def test_process_user_prompt_hook_generates_context_and_json_output(tmp_path: Pa
     ]
     assert (tmp_path / ".agent" / "sessions" / "context_pack.md").exists()
     assert (tmp_path / ".agent" / "codex" / "codex_prompt.md").exists()
+
+
+def test_process_user_prompt_hook_accepts_codex_payload_extras(tmp_path: Path):
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("def run():\n    return True\n", encoding="utf-8")
+
+    output = process_user_prompt_hook(
+        {
+            "cwd": str(tmp_path),
+            "hook_event_name": "UserPromptSubmit",
+            "prompt": "fix src/app.py",
+            "model": "gpt-5-codex",
+            "turn_id": "turn-validation",
+        },
+        target="codex",
+    )
+
+    assert "NACM prepared context" in output["hookSpecificOutput"]["additionalContext"]
+    assert (tmp_path / ".agent" / "sessions" / "current_task.md").read_text(
+        encoding="utf-8"
+    ).count("fix src/app.py")
 
 
 def test_process_user_prompt_hook_writes_claude_prompt_target(tmp_path: Path):
@@ -74,6 +97,64 @@ def test_install_status_and_uninstall_project_hooks(tmp_path: Path):
 
     assert status["claude-code"] is False
     assert status["codex"] is False
+
+
+def test_install_codex_hook_writes_windows_command_and_longer_timeout(tmp_path: Path):
+    install_hook(tmp_path, target="codex")
+
+    codex_hooks = json.loads((tmp_path / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+    command_hook = codex_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]
+
+    assert command_hook["command"] == hook_command_for("codex")
+    assert command_hook["commandWindows"] == windows_hook_command_for("codex")
+    assert command_hook["timeout"] == 120
+
+
+def test_process_hook_skips_non_prompt_events_without_writing_workspace(tmp_path: Path):
+    output = process_user_prompt_hook(
+        {
+            "cwd": str(tmp_path),
+            "hook_event_name": "PostToolUse",
+            "prompt": "fix src/app.py",
+        },
+        target="codex",
+    )
+
+    assert "skipped" in output["hookSpecificOutput"]["additionalContext"]
+    assert not (tmp_path / ".agent").exists()
+
+
+def test_uninstall_removes_legacy_and_current_commands(tmp_path: Path):
+    path = tmp_path / ".codex" / "hooks.json"
+    path.parent.mkdir()
+    path.write_text(
+        json.dumps(
+            {
+                "hooks": {
+                    "UserPromptSubmit": [
+                        {
+                            "hooks": [
+                                {
+                                    "type": "command",
+                                    "command": "python3 -m nacm hook run --target codex",
+                                },
+                                {
+                                    "type": "command",
+                                    "command": hook_command_for("codex"),
+                                },
+                            ]
+                        }
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    uninstall_hook(tmp_path, target="codex")
+
+    assert hook_status(tmp_path)["codex"] is False
+    assert "nacm hook run --target codex" not in path.read_text(encoding="utf-8")
 
 
 def test_hook_run_cli_reads_stdin_json(tmp_path: Path, monkeypatch):

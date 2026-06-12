@@ -7,6 +7,7 @@ All notable changes to NACM will be documented in this file.
 ### Added
 
 - Project-local UserPromptSubmit hook installer, status, uninstall, and JSON runner for Codex and Claude Code.
+- Hook compatibility hardening with platform-specific commands, longer hook timeout, legacy uninstall cleanup, and observed payload notes.
 - Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
 
 ## 0.1.0a3
