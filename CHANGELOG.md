@@ -2,6 +2,12 @@
 
 All notable changes to NACM will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- Contributing guide, issue templates, pull request template, and release checklist for open-source collaboration.
+
 ## 0.1.0a3
 
 Third alpha release candidate.

@@ -42,3 +42,15 @@ def test_github_templates_cover_expected_feedback_paths():
     assert "Prompt target" in target
     assert "py -3.11 -m pytest tests -q" in pr
     assert "py -3.11 -m ruff check ." in pr
+
+
+def test_release_checklist_documents_tagging_and_verification():
+    doc = (ROOT / "docs" / "release-checklist.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "py -3.11 -m pytest tests -q" in doc
+    assert "py -3.11 -m ruff check ." in doc
+    assert "py -3.11 -m nacm validate smoke" in doc
+    assert "py -3.11 -m pip wheel . -w $env:TEMP\\nacm-wheel-check" in doc
+    assert "git tag v0.1.0-alpha.X" in doc
+    assert "Release Checklist" in readme

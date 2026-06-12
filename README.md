@@ -100,4 +100,5 @@ nacm plan "refactor matcher and add tests"
 - [Installation](docs/install.md)
 - [Validation](docs/validation.md)
 - [Real Project Validation](docs/real-project-validation.md)
+- [Release Checklist](docs/release-checklist.md)
 - [Roadmap](docs/roadmap.md)
